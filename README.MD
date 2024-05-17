@@ -1,8 +1,7 @@
 <h1 align="center">喜马拉雅下载工具</h1>
 <h4 align="center">ximalaya-downloader</h4>
 
- ![visitors](https://visitor-badge.glitch.me/badge?page_id=844704781.ximalaya_downloader&left_color=green&right_color=red)
-
+![visitors](https://visitor-badge.glitch.me/badge?page_id=844704781.ximalaya_downloader&left_color=green&right_color=red)
 
 
 ### 说明
