@@ -49,7 +49,27 @@ node app.js --help
 
 
 
+#### 命令行相关参数
 
+```shell
+node app.js --help
+Usage: app [options]
+
+Options:
+  -a, --albumId <value>      请输入albumId,必填
+  -n, --concurrency <value>  并发数,默认10
+  -r, --overwrite <value>    覆盖操作,默认false
+  -t, --path <value>         当前要保存的目录,默认为~/Downloads
+  -h, --help                 display help for command
+```
+
+
+
+#### 使用案例
+
+```shell
+node app.js -a 51523585
+```
 
 
 
