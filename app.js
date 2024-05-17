@@ -122,7 +122,7 @@ async function main() {
             "trackCount": trackCount
         })
     }
-    const iTrackCount = await trackDB.count({})
+    const iTrackCount = await trackDB.count({'albumId': albumId})
     if (trackCount == iTrackCount) {
         needFlushTracks = false
     }
