@@ -1,8 +1,12 @@
 <h1 align="center">喜马拉雅下载工具</h1>
 <h4 align="center">ximalaya-downloader</h4>
 
+![Forks](https://img.shields.io/github/forks/844704781/ximalaya_downloader.svg?style=social) ![Stars](https://img.shields.io/github/stars/844704781/ximalaya_downloader.svg?style=social) ![Downloads](https://img.shields.io/github/downloads/844704781/ximalaya_downloader/total.svg)![License](https://img.shields.io/github/license/844704781/ximalaya_downloader.svg)![Release](https://img.shields.io/github/v/release/844704781/ximalaya_downloader.svg)![Contributors](https://img.shields.io/github/contributors/844704781/ximalaya_downloader.svg)
 
-![Visitors](https://visitor-badge.laobi.icu/badge?page_id=844704781.ximalaya_downloader)![LICENSE](https://img.shields.io/badge/license-CC%20BY--SA%204.0-green.svg)
+
+
+
+
 
 ### 说明
 本软件使用Node.js开发，提供喜马拉雅音频下载功能
@@ -36,3 +40,8 @@ PS：如果觉得这个项目不错，请一定为我点亮star，这对我很�
   <img src="http://qiniu.cospapa.cn/2071715937483_.pic.jpg" width="35%" />
   <img src="http://qiniu.cospapa.cn/2081715937598_.pic.jpg" width="35%" />
 </p>
+
+
+### Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=844704781/ximalaya_downloader&type=Date)](https://star-history.com/#844704781/ximalaya_downloader&Date)
