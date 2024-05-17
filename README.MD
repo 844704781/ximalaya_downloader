@@ -1,7 +1,8 @@
 <h1 align="center">喜马拉雅下载工具</h1>
 <h4 align="center">ximalaya-downloader</h4>
 
-![Visitors](https://visitor-badge.laobi.icu/badge?page_id=844704781.ximalaya_downloader)
+
+![Visitors](https://visitor-badge.laobi.icu/badge?page_id=844704781.ximalaya_downloader)![LICENSE](https://img.shields.io/badge/license-CC%20BY--SA%204.0-green.svg)
 
 ### 说明
 本软件使用Node.js开发，提供喜马拉雅音频下载功能
