@@ -1,7 +1,7 @@
 import {config} from '#root/common/config.js'
 import {iaxios} from "#root/common/axioscf.js";
 import {log} from '#root/common/log4jscf.js'
-import {decrypt} from "#root/handler/core/decrypt.js"
+import {decrypt} from "#root/handler/core/www2-decrypt.js"
 import {httpCookie, buildHeaders, getCookies} from "#root/common/utils.js";
 import fs from "fs";
 import path from 'path'
@@ -92,33 +92,13 @@ let download = async (url, targetDir, trackName) => {
     return filePath
 }
 
-/**
- * 获取解密参数
- * @param t
- * @returns {*}
- */
-let playUrl = (t) => {
-    let e, r = {}, n = 1;
-    return r.mediaType && t.some((function (t) {
-            return t.type.indexOf(r.mediaType) >= 0 && (e = t.url,
-                !0)
-        }
-    )),
-    e || (e = t[0].url),
-    t && t.length && (n = t[0].qualityLevel),
-        {
-            qualityLevel: n,
-            encodeText: e
-        }
-}
-
 
 // const cookies = await getCookies()
 // const baseInfo = await getBaseInfo(79787971, 698681839, cookies)
 // const playUrlList = baseInfo.trackInfo.playUrlList
 // const e = playUrl(playUrlList)
 //
-// const url = decrypt({deviceType: "www2", link: e.encodeText})
+// const url = www2Decrypt({deviceType: "www2", link: e.encodeText})
 // const filePath = config.archives + "/" + baseInfo.albumInfo.title
 // const bookName = baseInfo.trackInfo.title
 // await download(url, filePath, bookName)

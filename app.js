@@ -2,7 +2,7 @@ import {login, getCurrentUser, isLogin, checkUser} from '#root/handler/loginHand
 import {getTracksList, getAlbum} from '#root/handler/trackHandler.js'
 import {getBaseInfo, download, playUrl} from '#root/handler/downloadHandler.js'
 import {getCookies} from "#root/common/utils.js"
-import {decrypt} from "#root/handler/core/decrypt.js"
+import {decrypt} from "#root/handler/core/www2Decrypt.js"
 import {config} from '#root/common/config.js'
 import pLimit from 'p-limit';
 import {log} from '#root/common/log4jscf.js'
@@ -10,11 +10,11 @@ import {trackDB} from '#root/db/trackdb.js'
 import {albumDB} from '#root/db/albumdb.js'
 import {program} from "commander"
 import {AtomicInteger} from '#root/common/AtomicInteger.js'
+import {sleep} from '#root/common/utils.js'
 
 let taskCount = new AtomicInteger(0)
 
 let finishCount = new AtomicInteger(0)
-
 
 async function downloadAudio(track, path) {
     let user = await getCurrentUser(await getCookies())
@@ -23,7 +23,7 @@ async function downloadAudio(track, path) {
     const baseInfo = await getBaseInfo(track.albumId, track.trackId, cookies)
     const playUrlList = baseInfo.trackInfo.playUrlList
     const e = playUrl(playUrlList)
-    const url = decrypt({deviceType: "www2", link: e.encodeText})
+    const url = decrypt.getSoundCryptLink({deviceType: "www2", link: e.encodeText})
     const filePath = path + "/" + baseInfo.albumInfo.title
     const trackName = `${(parseInt(track.num) + 1)}.${baseInfo.trackInfo.title}`
     let target = await download(url, filePath, trackName)
@@ -51,16 +51,33 @@ async function getProgress(finishCount, taskCount) {
     return (n * 100).toFixed(2)
 }
 
-async function main() {
+function myParseInt(value, dummyPrevious) {
+    // parseInt takes a string and a radix
+    const parsedValue = parseInt(value, 10);
+    if (isNaN(parsedValue)) {
+        throw new commander.InvalidArgumentError('Not a number.');
+    }
+    return parsedValue;
+}
 
+
+async function main() {
+    log.info("欢迎使用 ximalaya_downloader！🎉 如果觉得棒棒哒，去 GitHub 给我们点个星星吧！🌟 GitHub 地址：https://github.com/844704781/ximalaya_downloader 💻\n")
     program
         .option('-a, --albumId <value>', '请输入albumId,必填')
-        .option('-n, --concurrency <value>', '并发数,默认10')
-        .option('-r, --overwrite <value>', '覆盖操作,默认false')
-        .option('-t, --path <value>', '当前要保存的目录,默认为~/Downloads');
+        .option('-n, --concurrency <number>', '并发数,默认10', myParseInt)
+        .option('-f, --fast', '快速模式')
+        .option('-r, --overwrite', '覆盖操作,默认false')
+        .option('-t, --path <value>', '当前要保存的目录,默认为~/Downloads', config.archives);
 
     program.parse(process.argv)
     const options = program.opts();
+    const albumId = options.albumId
+    if (albumId == null || albumId.trim() == '') {
+        log.error("请输入albumId")
+        throw new Error("请输入albumId")
+    }
+
     /**
      * 1. 判断是否登录，如果未登录，则登录
      * 2. 根据书名将书存入数据库，要保存是否完结
@@ -72,30 +89,20 @@ async function main() {
         login()
     }
     let user = await getCurrentUser(await getCookies())
+
     checkUser(user)
 
-    const albumId = options.albumId
-    if (albumId == null || albumId.trim() == '') {
-        log.error("请输入albumId")
-        return
-    }
-    log.info(`当前albumId:${albumId}`)
-    let concurrency = 10
-    if (options.concurrency != null && options.concurrency.trim() != '') {
-        concurrency = parseInt(options.concurrency)
-    }
-    let overwrite = false
-    if (options.overwrite != null && options.overwrite.trim() != '') {
-        overwrite = true
-    }
+    log.info(`当前albumId:${options.albumId}`)
+    log.info(`当前保存目录:${options.path}`)
+    if (options.fast)
+        log.warn(`🚀🚀🚀🚀🚀当前为快速模式,很容易被官方检测到哦`)
+    else
+        log.info('🐢🐢🐢🐢🐢当前为慢速模式')
 
-    let path = config.archives
-    if (options.path != null && options.path.trim() != '') {
-        path = options.path
-    }
-    log.info(`当前保存目录:${path}`)
 
-    const limit = pLimit(concurrency)
+    log.info(`并发数:${options.concurrency}`)
+    const limit = pLimit(options.concurrency)
+
     // 获取专辑详情
     log.info("正在获取专辑信息")
     const albumResponse = await getAlbum(albumId, await getCookies())
@@ -106,6 +113,7 @@ async function main() {
     const isFinished = albumSimple.albumPageMainInfo.isFinished
     const trackCount = albumInfo.trackCount
     log.info(`当前专辑:${albumTitle},总章节数:${trackCount}`)
+
     const album = await albumDB.findOne({"albumId": albumId})
     let needFlushTracks = true
 
@@ -155,7 +163,7 @@ async function main() {
         log.info("获取章节列表成功")
     }
     const condition = {"albumId": albumId}
-    if (!overwrite) {
+    if (!options.overwrite) {
         condition.done = false
     }
     await taskCount.set(await trackDB.count({}))
@@ -165,12 +173,15 @@ async function main() {
     }))
     await printProgress()
     while (true) {
-        const tracks = await trackDB.find(condition, {"num": 1}, concurrency * 2)
+        const tracks = await trackDB.find(condition, {"num": 1}, options.fast ? options.concurrency * 2 : 1)
         if (tracks.length == 0) {
             break
         }
-        const promises = tracks.map(track => limit(() => downloadAudio(track, path)))
+        const promises = tracks.map(track => limit(() => downloadAudio(track, options.path)))
         await Promise.all(promises)
+        if (!options.fast) {
+            await sleep(Math.floor(Math.random() * (5000 - 500 + 1)) + 500)
+        }
     }
 }
 

@@ -5,6 +5,7 @@
     "axios": "^1.6.8",
     "axios-retry": "^4.2.0",
     "commander": "^12.0.0",
+    "crypto-js": "^4.2.0",
     "esm": "^3.2.25",
     "fake-ua": "^1.0.4",
     "log4js": "^6.9.1",

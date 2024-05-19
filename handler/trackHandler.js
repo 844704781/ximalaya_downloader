@@ -25,6 +25,12 @@ let getTracksList = async (albumId, cookies, pageNum, pageSize) => {
     return response.data.data;
 }
 
+/**
+ * 获取专辑简况
+ * @param albumId
+ * @param cookies
+ * @returns {Promise<*>}
+ */
 let getAlbumSimple = async (albumId, cookies) => {
     const url = `${config.baseUrl}/revision/album/v1/simple?albumId=${albumId}`
     const cookie = httpCookie(cookies)
@@ -44,6 +50,13 @@ let getAlbumSimple = async (albumId, cookies) => {
     return response.data.data;
 }
 
+
+/**
+ * 获取专辑详情
+ * @param albumId
+ * @param cookies
+ * @returns {Promise<*>}
+ */
 let getAlbumInfo = async (albumId, cookies) => {
     const url = `${config.baseUrl}/tdk-web/seo/search/albumInfo?albumId=${albumId}`
     const cookie = httpCookie(cookies)
@@ -63,6 +76,13 @@ let getAlbumInfo = async (albumId, cookies) => {
     return response.data.data;
 }
 
+
+/**
+ * 获取专辑
+ * @param albumId
+ * @param cookies
+ * @returns {Promise<*>}
+ */
 let getAlbum = async (albumId, cookies) => {
     const simple = await getAlbumSimple(albumId, cookies)
     const info = await getAlbumInfo(albumId, cookies)

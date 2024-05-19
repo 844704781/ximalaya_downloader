@@ -5,6 +5,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 task.db
+/db/file
+**cookie**
+**qrcode**
 
 ### STS ###
 .apt_generated
@@ -41,3 +44,5 @@ cookies.json
 db/file/
 qrcode.png
 .DS_Store
+
+package-lock.json
