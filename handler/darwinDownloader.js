@@ -30,7 +30,7 @@ class DarwinDownloader extends AbstractDownloader {
         return result
     }
 
-    async _decrypt(encodeText) {
+    _decrypt(encodeText) {
         const url = decrypt.getSoundCryptLink(encodeText)
         return url
     }
@@ -49,7 +49,7 @@ async function test() {
 }
 
 
-test()
+// test()
 
 export {
     DarwinDownloader

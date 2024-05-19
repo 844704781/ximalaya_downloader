@@ -105,7 +105,6 @@ let getSoundCryptLink = function (e) {
 //     "link": "ZcHuyKWnJJyhwqnH2N0Ij42oYMuHR8xZmzrPUpEqb-uLDnuOR3ZwE6HpCgm-dsEPFZwuaSZJ837AeP7yM8hufjAPoY765Omc9VUK-R7AznUwiwSzg9SjflBXplmk7LpaNDih9w7XS0WhTzb5TQg-dY20Xmhs-pNB198CjD90Q9lnJuzZMuoMeUPjcua5LggAor8Oo6Ld3HzVvBJOuSvic2CLs7X975wLubA7Q5U-Xof4PA4H3cHc9w-gUZBiRti2ncFm9aJ2J0pzrIOO2QHlJj4RYB8BHIBDDOHA07fMwgMA_eIMpSHrvA"
 // }))
 
-export const www2Decrypt = {
+export const decrypt = {
     getSoundCryptLink,
-    playUrl
 }

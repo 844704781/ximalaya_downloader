@@ -44,23 +44,7 @@ class WebSiteDownloader extends AbstractDownloader {
         return result
     }
 
-    /**
-     * 下载音频
-     * @param trackId
-     * @returns {Promise<>}
-     */
-    async download(trackId) {
-        let user = await this._getCurrentUser()
-        await this._checkUser(user, true)
-        const baseInfo = await this._getBaseInfo(trackId)
-        const e = this._playUrl(baseInfo.playUrlList)
-        const url = decrypt.getSoundCryptLink({deviceType: this.deviceType, link: e.encodeText})
-        const data = await this._getAudio(url)
-        return data
-    }
-
-
-    async _decrypt(encodeText) {
+    _decrypt(encodeText) {
         const url = decrypt.getSoundCryptLink({deviceType: this.deviceType, link: encodeText})
         return url
     }
@@ -76,10 +60,11 @@ async function test() {
     const album = await downloader.getAlbum(33476331)
     const trackPageResult = await downloader.getTracksList(33476331, 1, 1)
     const data = await downloader.download(trackPageResult.tracks[0].trackId)
+    console.log(data)
 }
 
 
-test()
+// test()
 
 export {
     WebSiteDownloader

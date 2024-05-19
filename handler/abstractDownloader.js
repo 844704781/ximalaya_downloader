@@ -7,6 +7,7 @@ import path from "path";
 import fs from "fs";
 import {exec, spawn} from "child_process";
 import kill from "tree-kill";
+import {CustomError} from '#root/common/error.js'
 
 /**
  * 下载抽象类
@@ -166,6 +167,8 @@ class AbstractDownloader {
         await this._killQrCode(openProcess);
         fs.writeFileSync(this.cookiePath, Buffer.from(JSON.stringify(cookies)))
         log.info(this.deviceType, "登录成功")
+        const user = await this._getCurrentUser()
+        this._checkUser(user, false)
         return this
     }
 
@@ -325,7 +328,7 @@ class AbstractDownloader {
     async getTracksList(albumId, pageNum, pageSize) {
         const url = `${config.baseUrl}/revision/album/v1/getTracksList?albumId=${albumId}&pageNum=${pageNum}&pageSize=${pageSize}`
         const referer = `${config.baseUrl}/album/${albumId}`
-        const headers = buildHeaders(referer, this._getCookies())
+        const headers = buildHeaders(referer, await this._getCookies())
         const response = await iaxios.get(url, {headers: headers})
         if (response.status != 200) {
             throw new Error('网络请求失败')
@@ -350,13 +353,17 @@ class AbstractDownloader {
         const trackQualityLevel = 2
         const url = `${config.baseUrl}/mobile-playpage/track/v3/baseInfo/${Date.now()}?device=${this.deviceType}&trackId=${trackId}&trackQualityLevel=${trackQualityLevel}`
         const referer = `${config.baseUrl}/album/${trackId}`
-        const headers = buildHeaders(referer, this._getCookies())
+        const headers = buildHeaders(referer, await this._getCookies())
         const response = await iaxios.get(url, {headers: headers})
         if (response.status != 200) {
             throw new Error('网络请求失败');
         }
         if (response.data == null) {
             throw new Error('数据为空');
+        }
+        if (response.data.ret == 999) {
+            log.error("喜马拉雅内部异常", response.data)
+            throw new CustomError(999, '速率限制')
         }
         if (response.data.ret != 0) {
             log.error("喜马拉雅内部异常", response.data)
@@ -374,7 +381,9 @@ class AbstractDownloader {
      * @returns {Promise<*>}
      */
     async _getAudio(url) {
-
+        if (url == null) {
+            throw new Error("Invalid url")
+        }
         let response = await iaxios({
             method: 'GET',
             url: url,
@@ -430,16 +439,15 @@ class AbstractDownloader {
      * @param encodeText
      * @return url
      */
-    async _decrypt(encodeText) {
+    _decrypt(encodeText) {
         throw new Error("抽象方法，子类需要实现")
     }
-
 
 
     /**
      * 下载音频
      * @param trackId
-     * @returns {Promise<>}
+     * @returns {Promise<buffer, fileExtension>}
      */
     async download(trackId) {
         let user = await this._getCurrentUser()

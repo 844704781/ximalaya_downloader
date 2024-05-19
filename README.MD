@@ -44,7 +44,7 @@ PS：如果觉得这个项目不错，请一定为我点亮star，这对我很�
 
 ```shell
 npm install 
-node app.js --help
+node app1.js --help
 ```
 
 
@@ -52,7 +52,7 @@ node app.js --help
 #### 命令行相关参数
 
 ```shell
-node app.js --help
+node app1.js --help
 Usage: app [options]
 
 Options:
@@ -68,7 +68,7 @@ Options:
 #### 使用案例
 
 ```shell
-node app.js -a 51523585
+node app1.js -a 51523585
 ```
 
 

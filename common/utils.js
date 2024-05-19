@@ -1,3 +1,4 @@
+"use strict";
 import fs from "fs";
 import {projectRoot} from "#root/settings.js";
 
@@ -120,6 +121,7 @@ function addCookie(_cookies, key, value) {
         "Path": "/"
     })
 }
+
 
 export {
     sleep, httpCookie, buildHeaders, getCookies, parseCookies, convertCookiesToString, addCookie
