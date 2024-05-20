@@ -25,14 +25,15 @@ class WebSiteDownloader extends AbstractDownloader {
      * @private
      */
     async _getCookies() {
-        const cookies = await this.__getCookieKeyValues()
+        if (this.cookies) {
+            return this.cookies
+        }
+        const cookies = await this.__readCookies()
         if (cookies == null) {
             return null
         }
         addCookie(cookies, '_xmLog', 'h5&85125320-3c87-43c0-8228-f43734d4bddf&2.4.15-alpha.2');
         addCookie(cookies, 'wfp', 'ACM4MzBmMDg3ODg2OTc4NmRho0-cwtmso-54bXdlYl93d3c');
-        addCookie(cookies, '1&remember_me', 'y');
-        addCookie(cookies, '1&_token', '38899032&6A191DC0140N5B78906E9E4535F519D5462E2F2016825D9C3950B46D77603C2B5D683A489EED120M24D4D274BD39FD6_');
         addCookie(cookies, 'xm-page-viewid', 'ximalaya-web');
         addCookie(cookies, 'impl', 'www.ximalaya.com.login');
         addCookie(cookies, 'x_xmly_traffic', 'utm_source%253A%2526utm_medium%253A%2526utm_campaign%253A%2526utm_content%253A%2526utm_term%253A%2526utm_from%253A');
@@ -40,8 +41,8 @@ class WebSiteDownloader extends AbstractDownloader {
         addCookie(cookies, 'Hm_lpvt_4a7d8ec50cfd6af753c4f8aee3425070', Math.floor(Date.now() / 1000));
         addCookie(cookies, 'web_login', Date.now());
 
-        const result = convertCookiesToString(cookies)
-        return result
+        this.cookies = convertCookiesToString(cookies)
+        return this.cookies
     }
 
     _decrypt(encodeText) {

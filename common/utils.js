@@ -28,6 +28,9 @@ const PLATFORM = '"macOS"'
  * @param referer 'https://www.ximalaya.com'
  */
 function buildHeaders(referer, cookie) {
+    if(typeof cookie !== 'string'){
+        throw new Error('Cookie must be string')
+    }
     const headers = {
         'Accept': '*/*',
         'Accept-Language': 'zh-CN,zh;q=0.9',

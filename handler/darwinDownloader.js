@@ -17,8 +17,10 @@ class DarwinDownloader extends AbstractDownloader {
     }
 
     async _getCookies() {
-
-        const cookies = await this.__getCookieKeyValues()
+        if (this.cookies) {
+            return this.cookies
+        }
+        const cookies = await this.__readCookies()
         if (cookies == null) {
             return null
         }

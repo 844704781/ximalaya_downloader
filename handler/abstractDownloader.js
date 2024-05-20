@@ -38,10 +38,7 @@ class AbstractDownloader {
      * @returns {Promise<unknown>}
      * @private
      */
-    async __getCookieKeyValues() {
-        if (this.cookies != null) {
-            return this.cookies
-        }
+    async __readCookies() {
         const readFile = () => {
             return new Promise((resolve) => {
                 return fs.readFile(this.cookiePath, (err, data) => {
@@ -52,8 +49,7 @@ class AbstractDownloader {
                 })
             })
         }
-        this.cookies = await readFile()
-        return this.cookies
+        return await readFile()
     }
 
 
@@ -212,6 +208,10 @@ class AbstractDownloader {
         }
         if (response.data == null) {
             throw new Error('数据为空');
+        }
+        if (response.data.ret == 401) {
+            log.error(response.data.msg)
+            return null
         }
         if (response.data.ret != 200) {
             log.error("喜马拉雅内部异常", response.data)

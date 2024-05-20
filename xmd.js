@@ -72,7 +72,7 @@ async function main() {
     program
         .option('-a, --albumId <value>', '请输入albumId,必填')
         .option('-n, --concurrency <number>', '并发数,默认10', myParseInt)
-        .option('-f, --fast', '快速模式')
+        .option('-s, --slow', '慢速模式')
         .option('-r, --overwrite', '覆盖操作,默认false')
         .option('-t, --type', '登录类型,可选值pc、web,默认都登陆(需要扫码多次)')
         .option('-o, --output <value>', '当前要保存的目录,默认为~/Downloads', config.archives);
@@ -87,11 +87,15 @@ async function main() {
 
     log.info(`当前albumId:${options.albumId}`)
     log.info(`当前保存目录:${options.output}`)
-    if (options.fast) {
+    if (options.concurrency == null) {
+        options.concurrency = 10
+    }
+    if (!options.slow) {
         emoji = '🚀'
         log.warn(`${emoji.repeat(5)}当前为快速模式,很容易被官方检测到哦`)
     } else {
         emoji = '🐢'
+        options.concurrency = 1
         log.info(`${emoji.repeat(5)}当前为慢速模式`)
     }
 
@@ -167,7 +171,7 @@ async function main() {
     }))
     await printProgress()
     while (true) {
-        const tracks = await trackDB.find(condition, {"num": 1}, options.fast ? options.concurrency * 2 : 1)
+        const tracks = await trackDB.find(condition, {"num": 1}, !options.slow ? options.concurrency * 2 : 1)
         if (tracks.length == 0) {
             break
         }
@@ -175,7 +179,7 @@ async function main() {
             limit(() =>
                 download(factory, options, album, track)))
         await Promise.all(promises)
-        if (!options.fast) {
+        if (options.slow) {
             await sleep(Math.floor(Math.random() * (5000 - 500 + 1)) + 500)
         }
     }
