@@ -17,23 +17,5 @@
     "p-limit": "^5.0.0",
     "tree-kill": "^1.2.2"
   },
-  "type": "module",
-  "bin": {
-    "xmd": "xmd.js"
-  },
-  "scripts": {
-    "build": "pkg ."
-  },
-  "pkg": {
-    "scripts": "app.js",
-    "targets": [
-      "node14.21.3-macos-x64"
-    ],
-    "options": [
-      "experimental-modules"
-    ],
-    "assert": [
-      "config.json"
-    ]
-  }
+  "type": "module"
 }
