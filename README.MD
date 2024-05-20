@@ -75,10 +75,11 @@ node xmd.js -a 51523585 -s
 
 ### 请作者喝一杯可乐
 
-<p float="left">
-  <img src="http://qiniu.cospapa.cn/2071715937483_.pic.jpg" width="35%" />
-  <img src="http://qiniu.cospapa.cn/2081715937598_.pic.jpg" width="35%" />
-</p>
+<div style="overflow: hidden; border:solid 1px #eeeeee;">
+  <img src="http://qiniu.cospapa.cn/2071715937483_.pic.jpg" style="float: left; width: 35%;" />
+  <img src="http://qiniu.cospapa.cn/2081715937598_.pic.jpg" style="float: right; width: 35%;" />
+</div>
+
 
 
 ### Star History
