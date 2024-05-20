@@ -97,7 +97,7 @@ async function main() {
     }
     if (!options.slow) {
         emoji = '🚀'
-        log.warn(`${emoji.repeat(5)}当前为快速模式,很容易被官方检测到哦`)
+        log.warn(`${emoji.repeat(5)}当前为快速模式,很容易被官方大大踢屁屁哦`)
     } else {
         emoji = '🐢'
         options.concurrency = 1
@@ -177,6 +177,7 @@ async function main() {
         }
     }))
     await printProgress()
+    log.info("数据加载中...️")
     while (true) {
         const tracks = await trackDB.find(condition, {"num": 1}, !options.slow ? options.concurrency * 2 : 1)
         if (tracks.length == 0) {
