@@ -1,6 +1,6 @@
-import {WebSiteDownloader} from '#root/handler/webSiteDownloader.js'
-import {DarwinDownloader} from '#root/handler/DarwinDownloader.js'
-import {log} from '#root/common/log4jscf.js'
+import {WebSiteDownloader} from '../handler/webSiteDownloader.js'
+import {DarwinDownloader} from '../handler/DarwinDownloader.js'
+import {log} from '../common/log4jscf.js'
 
 class DownloaderFactory {
 

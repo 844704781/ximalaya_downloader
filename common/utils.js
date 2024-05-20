@@ -1,6 +1,6 @@
 "use strict";
 import fs from "fs";
-import {projectRoot} from "#root/settings.js";
+import {projectRoot} from "../settings.js";
 
 
 function sleep(ms) {

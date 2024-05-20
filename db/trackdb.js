@@ -1,4 +1,4 @@
-import {projectRoot} from "#root/settings.js";
+import {projectRoot} from "../settings.js";
 import Datastore from 'nedb'
 
 /**

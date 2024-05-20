@@ -1,10 +1,6 @@
-import {AbstractDownloader} from '#root/handler/abstractDownloader.js'
-import {convertCookiesToString, addCookie} from '#root/common/utils.js'
-import {decrypt} from "#root/handler/core/www2-decrypt.js"
-import {log} from '#root/common/log4jscf.js'
-import {buildHeaders} from '#root/common/utils.js'
-import {config} from '#root/common/config.js'
-import {iaxios} from '#root/common/axioscf.js'
+import {AbstractDownloader} from '../handler/abstractDownloader.js'
+import {convertCookiesToString, addCookie} from '../common/utils.js'
+import {decrypt} from "../handler/core/www2-decrypt.js"
 
 /**
  * 网站登录类

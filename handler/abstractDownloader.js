@@ -1,13 +1,13 @@
-import {iaxios} from '#root/common/axioscf.js'
-import {config} from '#root/common/config.js'
-import {projectRoot} from "#root/settings.js";
-import {log} from '#root/common/log4jscf.js'
-import {sleep, httpCookie, buildHeaders, getCookies, parseCookies} from '#root/common/utils.js'
+import {iaxios} from '../common/axioscf.js'
+import {config} from '../common/config.js'
+import {projectRoot} from "../settings.js";
+import {log} from '../common/log4jscf.js'
+import {sleep, httpCookie, buildHeaders, getCookies, parseCookies} from '../common/utils.js'
 import path from "path";
 import fs from "fs";
 import {exec, spawn} from "child_process";
 import kill from "tree-kill";
-import {CustomError} from '#root/common/error.js'
+import {CustomError} from '../common/error.js'
 
 /**
  * 下载抽象类
