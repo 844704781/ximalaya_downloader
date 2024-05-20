@@ -46,6 +46,9 @@ function myParseInt(value, dummyPrevious) {
 }
 
 async function download(factory, options, album, track) {
+    if (track.path && fs.existsSync(track.path)) {
+        return
+    }
     let targetDir = options.output + "/" + album.albumTitle
     if (targetDir.includes('~')) {
         targetDir = targetDir.replace('~', os.homedir())
@@ -53,6 +56,7 @@ async function download(factory, options, album, track) {
     if (!fs.existsSync(targetDir)) {
         mkdirpSync(targetDir)
     }
+
     const {data, deviceType} = await factory.getDownloader(options.type, async downloader => {
         return {
             data: await downloader.download(track.trackId),
@@ -61,19 +65,20 @@ async function download(factory, options, album, track) {
     })
     const filePath = targetDir + "/" + track.title + data.extension
     fs.writeFileSync(filePath, data.buffer)
-    await trackDB.update({'trackId': track.trackId}, {'done': true})
+    await trackDB.update({'trackId': track.trackId}, {'path': filePath})
     await finishCount.increment()
     await printProgress(track.title, filePath, deviceType)
 }
 
 
 async function main() {
-    log.info("欢迎使用 ximalaya_downloader！🎉\n如果觉得棒棒哒，去 GitHub 给我们点个星星吧！🌟\nGitHub 地址：https://github.com/844704781/ximalaya_downloader 💻\n")
+    log.info("欢迎使用 ximalaya_downloader！🎉")
+    log.info("如果觉得棒棒哒，去 GitHub 给我们点个星星吧！🌟")
+    log.info("GitHub 地址：https://github.com/844704781/ximalaya_downloader 💻")
     program
-        .option('-a, --albumId <value>', '请输入albumId,必填')
+        .option('-a, --albumId <value>', 'albumId,必填')
         .option('-n, --concurrency <number>', '并发数,默认10', myParseInt)
         .option('-s, --slow', '慢速模式')
-        .option('-r, --overwrite', '覆盖操作,默认false')
         .option('-t, --type', '登录类型,可选值pc、web,默认都登陆(需要扫码多次)')
         .option('-o, --output <value>', '当前要保存的目录,默认为~/Downloads', config.archives);
 
@@ -81,8 +86,8 @@ async function main() {
     const options = program.opts();
     const albumId = options.albumId
     if (albumId == null || albumId.trim() == '') {
-        log.error("请输入albumId")
-        throw new Error("请输入albumId")
+        log.error("要输入 albumId 哦，尝试输入 node xmd.js --help 查看使用说明吧😞")
+        return
     }
 
     log.info(`当前albumId:${options.albumId}`)
@@ -114,12 +119,13 @@ async function main() {
     let needFlushTracks = true
 
     if (album == null) {
-        await albumDB.insert({
+        album = {
             "albumId": albumId,
             "albumTitle": albumResp.albumTitle,
             "isFinished": albumResp.isFinished,//0:不间断更新 1:连载中 2:完结
             "trackCount": albumResp.trackCount
-        })
+        }
+        await albumDB.insert(album)
     } else {
         await albumDB.update({'albumId': albumId}, {
             "isFinished": album.isFinished,
@@ -153,7 +159,7 @@ async function main() {
                         "title": track.title,
                         "albumId": albumId,
                         "num": num,
-                        "done": false
+                        "path": null
                     })
                 }
                 log.info(`获取章节列中,总章节数:${album.trackCount},当前位置:${num}------>${track.title}`)
@@ -161,14 +167,14 @@ async function main() {
         }
         log.info("获取章节列表成功")
     }
-    const condition = {"albumId": albumId}
-    if (!options.overwrite) {
-        condition.done = false
-    }
+    const condition = {"albumId": albumId, path: null}
+
     await taskCount.set(await trackDB.count({}))
     await finishCount.set(await trackDB.count({
         "albumId": albumId,
-        "done": true
+        "path": {
+            $ne: null
+        }
     }))
     await printProgress()
     while (true) {
@@ -177,8 +183,8 @@ async function main() {
             break
         }
         const promises = tracks.map(track =>
-            limit(() =>
-                download(factory, options, album, track)))
+            limit(async () =>
+                await download(factory, options, album, track)))
         await Promise.all(promises)
         if (options.slow) {
             await sleep(Math.floor(Math.random() * (5000 - 500 + 1)) + 500)

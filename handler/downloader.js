@@ -1,7 +1,6 @@
 import {WebSiteDownloader} from '#root/handler/webSiteDownloader.js'
 import {DarwinDownloader} from '#root/handler/DarwinDownloader.js'
 import {log} from '#root/common/log4jscf.js'
-import {CustomError} from '#root/common/error.js'
 
 class DownloaderFactory {
 
