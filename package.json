@@ -4,9 +4,12 @@
   "description": "Ximalaya Downloader, helps VIP users download their favorite albums",
   "author": "watermelon <844704781@qq.com>",
   "license": "GPL",
+  "scripts": {
+    "start": "electron ."
+  },
   "dependencies": {
     "async-mutex": "^0.5.0",
-    "axios": "~0.27.2",
+    "axios": "^1.7.0",
     "axios-retry": "^4.2.0",
     "commander": "^12.0.0",
     "crypto-js": "^4.2.0",
