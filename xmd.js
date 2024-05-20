@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import {config} from '#root/common/config.js'
 import pLimit from 'p-limit';
 import {log} from '#root/common/log4jscf.js'

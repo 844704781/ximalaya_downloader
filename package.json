@@ -1,7 +1,7 @@
 {
   "name": "ximalaya_downloader",
   "version": "1.0.0",
-  "description": "Ximalaya Downloader,helps VIP users download their favorite albums",
+  "description": "Ximalaya Downloader, helps VIP users download their favorite albums",
   "author": "watermelon <844704781@qq.com>",
   "license": "GPL",
   "dependencies": {
@@ -20,5 +20,11 @@
   "type": "module",
   "imports": {
     "#root/*.js": "./*.js"
+  },
+  "bin": {
+    "xmd": "./xmd.js"
+  },
+  "pkg": {
+    "scripts": ["xmd.js"]
   }
 }
