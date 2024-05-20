@@ -1,4 +1,9 @@
 {
+  "name": "ximalaya_downloader",
+  "version": "1.0.0",
+  "description": "Ximalaya Downloader,helps VIP users download their favorite albums",
+  "author": "watermelon <844704781@qq.com>",
+  "license": "GPL",
   "dependencies": {
     "async-mutex": "^0.5.0",
     "axios": "^1.6.8",

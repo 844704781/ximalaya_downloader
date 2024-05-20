@@ -4,20 +4,14 @@
 ![Forks](https://img.shields.io/github/forks/844704781/ximalaya_downloader.svg?style=social) ![Stars](https://img.shields.io/github/stars/844704781/ximalaya_downloader.svg?style=social) ![Downloads](https://img.shields.io/github/downloads/844704781/ximalaya_downloader/total.svg)![License](https://img.shields.io/github/license/844704781/ximalaya_downloader.svg)![Release](https://img.shields.io/github/v/release/844704781/ximalaya_downloader.svg)![Contributors](https://img.shields.io/github/contributors/844704781/ximalaya_downloader.svg)
 
 
-
-
-
-
 ### 说明
-本软件使用Node.js开发，提供喜马拉雅音频下载功能
+这款软件是用 Node.js 开发的，提供喜马拉雅音频下载功能，仅供学习参考使用。
 
 当我的喜马拉雅 VIP 账号要过期时，我发现自己还有一堆喜欢的专辑没听完！考虑到我听东西的速度比蜗牛还慢，我决定在 VIP 还有效的时候，把喜欢的音频专辑下载下来慢慢享用。于是，我边捉急边开发了这款软件。
 
 这个软件是用纯 Node.js 语言打造的，虽然我编程水平一般般，但我会尽力不让它荒废。哪怕我碰巧有空闲时间，也会不断更新它。不过，如果你在试用的时候发现了 bug，别急，别急，别急！欢迎在 GitHub 上提 issue，或者大佬们也可以随时提交 PR，我会不胜感激的！
 
-PS：如果觉得这个项目不错，请一定为我点亮star，这对我很重要(失业中😭)！另外，如果您愿意的话，也可以给我一点小小的赞助。
-
-
+PS：如果觉得这个项目不错，请一定为我点亮 star，这对我很重要（失业中😭）！另外，如果您愿意的话，也可以给我一点小小的赞助。
 
 ### 已实现功能
 
@@ -32,8 +26,6 @@ PS：如果觉得这个项目不错，请一定为我点亮star，这对我很�
 
 - [ ] GUI界面
 
-
-
 ### 源码编译
 
 环境:
@@ -46,8 +38,6 @@ PS：如果觉得这个项目不错，请一定为我点亮star，这对我很�
 npm install 
 node xmd.js --help
 ```
-
-
 
 #### 命令行相关参数
 
@@ -63,25 +53,17 @@ Options:
   -o, --output <value>        当前要保存的目录,默认为~/Downloads (default: "~/Downloads")
   -h, --help                  display help for command
 ```
-
-
-
 #### 使用案例
 
 ```shell
 node xmd.js -a 51523585 -s
 ```
-
-
-
 ### 请作者喝一杯可乐
 
 <div style="overflow: hidden; border:solid 1px #eeeeee;">
   <img src="http://qiniu.cospapa.cn/2071715937483_.pic.jpg" style="float: left; width: 35%;" />
   <img src="http://qiniu.cospapa.cn/2081715937598_.pic.jpg" style="float: right; width: 35%;" />
 </div>
-
-
 
 ### Star History
 
