@@ -1,5 +1,6 @@
 {
   "baseUrl": "https://www.ximalaya.com",
   "loginBaseUrl": "https://passport.ximalaya.com",
-  "archives": "~/Downloads"
+  "archives": "~/Downloads",
+  "xmd": "~/.xmd"
 }

@@ -1,12 +1,13 @@
-import {projectRoot} from "../settings.js";
 import Datastore from 'nedb'
+import {config} from '../common/config.js'
+import os from 'os'
 
 /**
  * 记录专辑
  */
 
 const db = new Datastore({
-    filename: `${projectRoot}/db/file/track.db`,
+    filename: `${config.xmd.replace('~', os.homedir())}/db/file/track.db`,
     autoload: true
 });
 

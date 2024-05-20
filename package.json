@@ -19,17 +19,21 @@
   },
   "type": "module",
   "bin": {
-    "xmd": "./xmd.js"
+    "xmd": "xmd.js"
+  },
+  "scripts": {
+    "build": "pkg ."
   },
   "pkg": {
-    "scripts": "xmd.js",
+    "scripts": "app.js",
     "targets": [
-      "node18.5.0-linux-x64",
-      "node18.5.0-macos-x64",
-      "node18.5.0-win-x64"
+      "node14.21.3-macos-x64"
     ],
     "options": [
       "experimental-modules"
+    ],
+    "assert": [
+      "config.json"
     ]
   }
 }

@@ -1,8 +1,3 @@
-"use strict";
-import fs from "fs";
-import {projectRoot} from "../settings.js";
-
-
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -28,7 +23,7 @@ const PLATFORM = '"macOS"'
  * @param referer 'https://www.ximalaya.com'
  */
 function buildHeaders(referer, cookie) {
-    if(typeof cookie !== 'string'){
+    if (typeof cookie !== 'string') {
         throw new Error('Cookie must be string')
     }
     const headers = {
@@ -49,24 +44,6 @@ function buildHeaders(referer, cookie) {
         'sec-ch-ua-platform': PLATFORM
     };
     return headers
-}
-
-/**
- * 获取本地cookies
- * @returns {Promise<unknown>}
- */
-async function getCookies() {
-    const COOKIE_PATH = `${projectRoot}/cookies.json`
-
-    let cookies = await new Promise((resolve) => {
-        return fs.readFile(COOKIE_PATH, (err, data) => {
-            if (err) {
-                return resolve(null)
-            }
-            return resolve(JSON.parse(String(data)))
-        })
-    })
-    return cookies;
 }
 
 
@@ -127,5 +104,5 @@ function addCookie(_cookies, key, value) {
 
 
 export {
-    sleep, httpCookie, buildHeaders, getCookies, parseCookies, convertCookiesToString, addCookie
+    sleep, httpCookie, buildHeaders, parseCookies, convertCookiesToString, addCookie
 }

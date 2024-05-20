@@ -1,13 +1,13 @@
 import {iaxios} from '../common/axioscf.js'
 import {config} from '../common/config.js'
-import {projectRoot} from "../settings.js";
 import {log} from '../common/log4jscf.js'
-import {sleep, httpCookie, buildHeaders, getCookies, parseCookies} from '../common/utils.js'
+import {sleep, buildHeaders, parseCookies} from '../common/utils.js'
 import path from "path";
 import fs from "fs";
 import {exec, spawn} from "child_process";
 import kill from "tree-kill";
 import {CustomError} from '../common/error.js'
+import os from 'os'
 
 /**
  * 下载抽象类
@@ -18,8 +18,8 @@ class AbstractDownloader {
             throw new Error("抽象类不能被实例化")
         }
         this.deviceType = deviceType
-        this.cookiePath = path.join(projectRoot, `${deviceType}-cookies.json`)
-        this.qrCodePath = path.join(projectRoot, `${deviceType}-qrcode.png`);
+        this.cookiePath = path.join(config.xmd.replace('~', os.homedir()), `${deviceType}-cookies.json`)
+        this.qrCodePath = path.join(config.xmd.replace('~', os.homedir()), `${deviceType}-qrcode.png`);
         this.albumId = null
         this.cookies = null
 
