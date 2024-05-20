@@ -110,21 +110,22 @@ async function main() {
     })
 
     log.info(`当前专辑:${albumResp.albumTitle},总章节数:${albumResp.trackCount}`)
-    const album = await albumDB.findOne({"albumId": albumId})
+    let album = await albumDB.findOne({"albumId": albumId})
     let needFlushTracks = true
 
     if (album == null) {
         await albumDB.insert({
             "albumId": albumId,
-            "albumTitle": album.albumTitle,
-            "isFinished": album.isFinished,//0:不间断更新 1:连载中 2:完结
-            "trackCount": album.trackCount
+            "albumTitle": albumResp.albumTitle,
+            "isFinished": albumResp.isFinished,//0:不间断更新 1:连载中 2:完结
+            "trackCount": albumResp.trackCount
         })
     } else {
         await albumDB.update({'albumId': albumId}, {
             "isFinished": album.isFinished,
             "trackCount": album.trackCount
         })
+        album = albumResp
     }
 
     const iTrackCount = await trackDB.count({'albumId': albumId})

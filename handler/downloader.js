@@ -55,7 +55,7 @@ class DownloaderFactory {
             if (isLogin) {
                 continue
             }
-            log.info(`登录${type}中...`)
+            log.info(`登录${downloader.deviceType}中...`)
             await downloader.login()
         }
     }
@@ -70,8 +70,23 @@ class DownloaderFactory {
         if (this.downloaders.length == 0) {
             await this._login(type)
         }
-        for (const index in this.downloaders) {
-            const item = this.downloaders[index]
+
+        const downloads = Object.assign([], this.downloaders)
+        /**
+         * 从downloads随机pop一个元素
+         * @param downloads
+         * @returns {*}
+         * @private
+         */
+        let _getRandomItem = (_downloads) => {
+            if (_downloads.length == 0) {
+                return {}
+            }
+            const randomIndex = Math.floor(Math.random() * _downloads.length);
+            return _downloads.splice(randomIndex, 1)[0];
+        };
+        for (let i = 0; i < this.downloaders.length; i++) {
+            const item = _getRandomItem(downloads)
             if (item.isLimit) {
                 continue
             }

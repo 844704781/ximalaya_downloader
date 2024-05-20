@@ -202,7 +202,6 @@ class AbstractDownloader {
         const cookie = await this._getCookies()
         const headers = buildHeaders(config.baseUrl, cookie)
         const response = await iaxios.get(url, {headers: headers})
-
         if (response.status != 200) {
             throw new Error('网络请求失败');
         }
@@ -312,6 +311,7 @@ class AbstractDownloader {
         const simple = await this._getAlbumSimple(albumId, await this._getCookies())
         const info = await this._getAlbumInfo(albumId, await this._getCookies())
         return {
+            albumId: albumId,
             albumTitle: simple['albumPageMainInfo']['albumTitle'],
             isFinished: simple['albumPageMainInfo']['isFinished'],
             trackCount: info['trackCount']

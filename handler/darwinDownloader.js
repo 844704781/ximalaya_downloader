@@ -27,9 +27,8 @@ class DarwinDownloader extends AbstractDownloader {
         addCookie(cookies, 'channel', 99)
         addCookie(cookies, '1&_device', 'darwin&24c60e8a-6a6d-51a2-af64-7613fb39a4ef&4.0.2')
         addCookie(cookies, 'v1', 'V(dDwi:*pp=zY.7#NbQ^')
-        addCookie(cookies, '1&remember_me', 'y')
-        const result = convertCookiesToString(cookies)
-        return result
+        this.cookies = convertCookiesToString(cookies)
+        return this.cookies
     }
 
     _decrypt(encodeText) {
