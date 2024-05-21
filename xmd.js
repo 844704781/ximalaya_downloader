@@ -10,12 +10,13 @@ import {sleep} from './common/utils.js'
 import {DownloaderFactory} from './handler/downloader.js'
 import os from "os";
 import fs from "fs";
+import path from 'path'
 import {mkdirpSync} from "mkdirp";
 
 let taskCount = new AtomicInteger(0)
 let finishCount = new AtomicInteger(0)
 
-let emoji = '🐢'
+let emoji = '>'
 
 async function printProgress(trackName, target, deviceType) {
     const downloaderName = `${deviceType == null ? '' : `(${deviceType})`}`
@@ -46,14 +47,26 @@ function myParseInt(value, dummyPrevious) {
     return parsedValue;
 }
 
+function cleanedStr(str) {
+    // 定义文件路径相关字符的正则表达式
+    const pathCharactersRegex = /[<>:"\/\\|?*\x00-\x1F]/g;
+    // 定义替换后的字符
+    const replacementCharacter = '_';
+    // 替换文件路径相关字符
+    const encodedStr = str.replace(pathCharactersRegex, replacementCharacter);
+    return encodedStr;
+}
+
 async function download(factory, options, album, track) {
     if (track.path && fs.existsSync(track.path)) {
         return
     }
-    let targetDir = options.output + "/" + album.albumTitle
+    let targetDir = options.output
     if (targetDir.includes('~')) {
         targetDir = targetDir.replace('~', os.homedir())
     }
+    targetDir = path.join(targetDir, cleanedStr(album.albumTitle))
+
     if (!fs.existsSync(targetDir)) {
         mkdirpSync(targetDir)
     }
@@ -64,7 +77,7 @@ async function download(factory, options, album, track) {
             deviceType: downloader.deviceType
         }
     })
-    const filePath = targetDir + "/" + track.title + data.extension
+    const filePath = path.join(targetDir, cleanedStr(track.title) + data.extension)
     fs.writeFileSync(filePath, data.buffer)
     await trackDB.update({'trackId': track.trackId}, {'path': filePath})
     await finishCount.increment()
@@ -73,9 +86,9 @@ async function download(factory, options, album, track) {
 
 
 async function main() {
-    log.info("欢迎使用 ximalaya_downloader！🎉")
-    log.info("如果觉得棒棒哒，去 GitHub 给我们点个星星吧！🌟")
-    log.info("GitHub 地址：https://github.com/844704781/ximalaya_downloader 💻")
+    log.info("欢迎使用 ximalaya_downloader！(^o^)/")
+    log.info("如果觉得棒棒哒，去 GitHub 给我们点个星星吧！★")
+    log.info("GitHub 地址：https://github.com/844704781/ximalaya_downloader ⇓⇓⇓")
     program
         .option('-a, --albumId <value>', 'albumId,必填')
         .option('-n, --concurrency <number>', '并发数,默认10', myParseInt)
@@ -97,10 +110,10 @@ async function main() {
         options.concurrency = 10
     }
     if (!options.slow) {
-        emoji = '🚀'
+        emoji = '＞'
         log.warn(`${emoji.repeat(5)}当前为快速模式,很容易被官方大大踢屁屁哦`)
     } else {
-        emoji = '🐢'
+        emoji = '>'
         options.concurrency = 1
         log.info(`${emoji.repeat(5)}当前为慢速模式`)
     }
