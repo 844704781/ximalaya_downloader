@@ -13,13 +13,15 @@
 
 PS：如果觉得这个项目不错，请一定为我点亮 star，这样可以让我显得比较酷！
 
-### 已知问题
+### 已知问题及解决办法
 
-1.   **系统繁忙，请稍后再试**
+1. **系统繁忙，请稍后再试**
 
- 如果出现"系统繁忙，请稍后再试"的字样，请一个小时后再试试哦，建议慢速下载
+   出现这种情况，代表pc渠道被风控啦 。可以一个小时后再试试哦，建议开启慢速模式下载
 
+2. **今天操作太频繁啦，可以明天再试试哦~**
 
+   出现这种情况，代表web接口的额度已经用完啦，没关系，咱们还有pc渠道可用
 
 
 ### 命令行版
@@ -98,7 +100,7 @@ node xmd.js -a 51523585 -s
 ### 请作者喝一杯可乐
 
 <div style="overflow: hidden; border:solid 1px #eeeeee;">
-  <img src="http://qiniu.cospapa.cn/2081715937598_.pic.jpg" style="float: right; width: 35%;" />
+  <img src="http://qiniu.cospapa.cn/2081715937598_.pic.jpg" style="float: left; width: 35%;" />
 </div>
 
 
