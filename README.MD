@@ -11,7 +11,15 @@
 
 这个软件是用纯 Node.js 语言打造的，虽然我编程水平一般般，但我会尽力不让它荒废。哪怕我碰巧有空闲时间，也会不断更新它。不过，如果你在试用的时候发现了 bug，别急，别急，别急！欢迎在 GitHub 上提 issue，或者大佬们也可以随时提交 PR，我会不胜感激的！
 
-PS：如果觉得这个项目不错，请一定为我点亮 star，这对我很重要（失业中😭）！另外，如果您愿意的话，也可以给我一点小小的赞助。
+PS：如果觉得这个项目不错，请一定为我点亮 star，这样可以让我显得比较酷！
+
+### 已知问题
+
+1.   **系统繁忙，请稍后再试**
+
+ 如果出现"系统繁忙，请稍后再试"的字样，请一个小时后再试试哦，建议慢速下载
+
+
 
 
 ### 命令行版
@@ -90,9 +98,9 @@ node xmd.js -a 51523585 -s
 ### 请作者喝一杯可乐
 
 <div style="overflow: hidden; border:solid 1px #eeeeee;">
-  <img src="http://qiniu.cospapa.cn/2071715937483_.pic.jpg" style="float: left; width: 35%;" />
   <img src="http://qiniu.cospapa.cn/2081715937598_.pic.jpg" style="float: right; width: 35%;" />
 </div>
+
 
 ### Star History
 
