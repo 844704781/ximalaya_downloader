@@ -324,11 +324,12 @@ class AbstractDownloader {
         }
         const simple = await this._getAlbumSimple(albumId, await this._getCookies())
         const info = await this._getAlbumInfo(albumId, await this._getCookies())
+        const book = await this.getTracksList(albumId, 1, 1)
         return {
             albumId: albumId,
             albumTitle: simple['albumPageMainInfo']['albumTitle'],
             isFinished: simple['albumPageMainInfo']['isFinished'],
-            trackCount: info['trackCount']
+            trackCount: book.trackTotalCount
         }
     }
 

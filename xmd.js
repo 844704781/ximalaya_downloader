@@ -77,7 +77,7 @@ async function download(factory, options, album, track) {
             deviceType: downloader.deviceType
         }
     })
-    const filePath = path.join(targetDir, cleanedStr(track.title) + data.extension)
+    const filePath = path.join(targetDir, track.num + "." + cleanedStr(track.title) + data.extension)
     fs.writeFileSync(filePath, data.buffer)
     await trackDB.update({'trackId': track.trackId}, {'path': filePath})
     await finishCount.increment()
@@ -86,9 +86,9 @@ async function download(factory, options, album, track) {
 
 
 async function main() {
-    log.info("欢迎使用 ximalaya_downloader！(^o^)/")
-    log.info("如果觉得棒棒哒，去 GitHub 给我们点个星星吧！★")
-    log.info("GitHub 地址：https://github.com/844704781/ximalaya_downloader ⇓⇓⇓")
+    log.info("欢迎使用 ximalaya_downloader！🎉")
+    log.info("如果觉得棒棒哒，去 GitHub 给我们点个星星吧！🌟")
+    log.info("GitHub 地址：https://github.com/844704781/ximalaya_downloader 💻")
     program
         .option('-a, --albumId <value>', 'albumId,必填')
         .option('-n, --concurrency <number>', '并发数,默认10', myParseInt)
@@ -111,11 +111,11 @@ async function main() {
     }
     if (!options.slow) {
         emoji = '＞'
-        log.warn(`${emoji.repeat(5)}当前为快速模式,很容易被官方大大踢屁屁哦`)
+        log.warn(`${'🚀'.repeat(5)}当前为快速模式,很容易被官方大大踢屁屁哦`)
     } else {
         emoji = '>'
         options.concurrency = 1
-        log.info(`${emoji.repeat(5)}当前为慢速模式`)
+        log.info(`${'🐢'.repeat(5)}当前为慢速模式`)
     }
 
     log.info(`并发数:${options.concurrency}`)

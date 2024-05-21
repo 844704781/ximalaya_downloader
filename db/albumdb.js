@@ -1,13 +1,14 @@
 import Datastore from 'nedb'
 import {config} from "../common/config.js";
 import os from 'os'
+import path from 'path'
 
 /**
  * 记录专辑
  */
 
 const db = new Datastore({
-    filename: `${config.xmd.replace('~', os.homedir())}/db/file/album.db`,
+    filename : path.join(config.xmd.replace('~', os.homedir()),'db','file','album.db'),
     autoload: true
 });
 
