@@ -12,6 +12,7 @@ import os from "os";
 import fs from "fs";
 import path from 'path'
 import {mkdirpSync} from "mkdirp";
+import {rimrafSync} from 'rimraf'
 
 let taskCount = new AtomicInteger(0)
 let finishCount = new AtomicInteger(0)
@@ -94,6 +95,7 @@ async function main() {
         .option('-n, --concurrency <number>', '并发数,默认10', myParseInt)
         .option('-s, --slow', '慢速模式')
         .option('-t, --type', '登录类型,可选值pc、web,默认都登陆(需要扫码多次)')
+        .option('-r, --replace', '清除缓存,任务将重新下载')
         .option('-o, --output <value>', '当前要保存的目录,默认为~/Downloads', config.archives);
 
     program.parse(process.argv)
@@ -103,9 +105,13 @@ async function main() {
         log.error("要输入 albumId 哦，尝试输入 node xmd.js --help 查看使用说明吧😞")
         return
     }
-
+    if (options.replace) {
+        log.info("清空缓存中...")
+        rimrafSync(path.join(config.xmd.replace('~', os.homedir()), 'db', 'file'))
+    }
     log.info(`当前albumId:${options.albumId}`)
     log.info(`当前保存目录:${options.output}`)
+
     if (options.concurrency == null) {
         options.concurrency = 10
     }
