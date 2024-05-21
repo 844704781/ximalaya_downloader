@@ -70,32 +70,34 @@ class DownloaderFactory {
             await this._login(type)
         }
 
-        const downloads = Object.assign([], this.downloaders)
-        /**
-         * 从downloads随机pop一个元素
-         * @param downloads
-         * @returns {*}
-         * @private
-         */
-        let _getRandomItem = (_downloads) => {
-            if (_downloads.length == 0) {
-                return {}
-            }
-            const randomIndex = Math.floor(Math.random() * _downloads.length);
-            return _downloads.splice(randomIndex, 1)[0];
-        };
+        //const downloads = Object.assign([], this.downloaders)
+        // /**
+        //  * 从downloads随机pop一个元素
+        //  * @param downloads
+        //  * @returns {*}
+        //  * @private
+        //  */
+        // let _getRandomItem = (_downloads) => {
+        //     if (_downloads.length == 0) {
+        //         return {}
+        //     }
+        //     const randomIndex = Math.floor(Math.random() * _downloads.length);
+        //     return _downloads.splice(randomIndex, 1)[0];
+        // };
         for (let i = 0; i < this.downloaders.length; i++) {
-            const item = _getRandomItem(downloads)
+            //const item = _getRandomItem(downloads)
+            const item = this.downloaders[i]
             if (item.isLimit) {
                 continue
             }
             try {
-                return cb(item.downloader)
+                return await cb(item.downloader)
             } catch (e) {
                 item.isLimit = true
                 continue
             }
         }
+        log.error("所有下载方式都受限了，明天再试哦")
         throw new Error("所有下载方式都受限了，明天再试哦")
     }
 

@@ -178,9 +178,9 @@ class AbstractDownloader {
             }
 
             //处理登录成功
-            try{
+            try {
                 await this._killQrCode(openProcess);
-            }catch (e){
+            } catch (e) {
                 log.debug(e)
                 log.info(this.deviceType, "扫码已成功，可自行关闭图片程序")
             }
@@ -386,12 +386,12 @@ class AbstractDownloader {
         if (response.data == null) {
             throw new Error('数据为空');
         }
-        if (response.data.ret == 999) {
-            log.error("喜马拉雅内部异常", response.data)
-            throw new CustomError(999, '速率限制')
+        if (response.data.ret == 999 || response.data.ret == 1001) {
+            log.error(`${this.deviceType}端喜马拉雅接口内部异常`, response.data)
+            throw new CustomError(999, `${this.deviceType}端速率限制`)
         }
         if (response.data.ret != 0) {
-            log.error("喜马拉雅内部异常", response.data)
+            log.error(`${this.deviceType}端喜马拉雅接口内部异常`, response.data)
             throw new Error("喜马拉雅内部异常")
         }
         return {
