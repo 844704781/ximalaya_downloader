@@ -97,8 +97,8 @@ class DownloaderFactory {
                 continue
             }
         }
-        log.error("所有下载方式都受限了，明天再试哦")
-        throw new Error("所有下载方式都受限了，明天再试哦")
+        log.error("所有下载方式都受限了，可以一个小时后后再过来试试哦")
+        throw new Error("所有下载方式都受限了，可以一个小时后后再过来试试哦")
     }
 
 }
