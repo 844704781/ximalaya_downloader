@@ -21,11 +21,12 @@ PS：如果觉得这个项目不错，请一定为我点亮 star，这对我很�
 
 ### 已实现功能
 
-- [x] 官方扫码登录
+- [x] 官方扫码登录模式
+- [x] 手动配置cookie模式
 - [x] 自定义下载路径
 - [x] 已购声音或vip免费声音下载
 - [x] 自动重新下载下载失败的音频
-- [x] 选择下载音频的音质
+- [x] 自动下载最优质音频
 - [x] 整个专辑全量下载
 
 ### 可能会实现的功能
@@ -59,6 +60,29 @@ Options:
   -o, --output <value>        当前要保存的目录,默认为~/Downloads (default: "~/Downloads")
   -h, --help                  display help for command
 ```
+#### 配置文件相关参数介绍
+config.json
+```json
+{
+  "baseUrl": "https://www.ximalaya.com", //主要参数，不能修改
+  "loginBaseUrl": "https://passport.ximalaya.com",//主要参数，不能修改
+  "archives": "~/Downloads",//默认文件下载路径，可自行配置
+  "xmd": "~/.xmd",//缓存文件保存路径，不建议修改
+  "cookie": {
+    "www2": {
+      //www2模式就是web模式
+      "serverMode": false,//开启这个模式需要在下方value位置手动配置cookie，否则会调用操作系统图片程序扫码登录
+      "value": "_xmLog=h5&6fe19548-77ea-4081-ac15-79c76f9b128e&process.env.sdkVersion; wfp=ACM5MGVkODA5Y2JmODBmOTMwCIX-UWWo8a14bXdlYl93d3c; xm-page-viewid=ximalaya-web; impl=www.ximalaya.com.login; x_xmly_traffic=utm_source%253A%2526utm_medium%253A%2526utm_campaign%253A%2526utm_content%253A%2526utm_term%253A%2526utm_from%253A; Hm_lvt_4a7d8ec50cfd6af753c4f8aee3425070=1716267285,1716271020; 1&remember_me=y; 1&_token=38899111&C8178570140N16B3B2D31D474973DA09080ECE495BE79CFCBFC3F7C85DCBF6E71432C26E471F80ME5430611143ADEC_; 1_l_flag=38899032&C8178570140N16B3B2D31D474973DA09080ECE495BE79CFCBFC3F7C85DCBF6E71432C26E471F80ME5430611143ADEC__2024-05-2113:57:06; Hm_lpvt_4a7d8ec50cfd6af753c4f8aee3425070=1716271027; web_login=1716271049603"//cookie值，请自行获取
+    },
+    "mac": {
+      //mac模式就是pc客户端模式，win或者mac的客户端由于使用electron编写，所以都可以使用这个配置
+      "serverMode": false,//开启这个模式需要在下方value位置手动配置cookie，否则会调用操作系统图片程序扫码登录
+      "value": "install_id=094b9a9c-ab3a-4777-b46e-6d6a5f70af16;channel=99&100001;1&_device=win32&094b9a9c-ab3a-4777-b46e-6d6a5f70af16&4.0.3;1&remember_me=y;1&_token=38899111&58AE1D40240C3F3CD157DD11955201020C188A83A44003D79E44FE7CB9A913E17B7B6987E6B591M4ca4da18AF029D3_;1_l_flag=38899032&58AE1D40240C3F3CD157DD11955201020C188A83A44003D79E44FE7CB9A913E17B7B6987E6B591M4ca4da18AF029D3__2024-05-2114:21:38;"//cookie值，请自行获取
+    }
+  }
+}
+```
+
 #### 使用案例
 
 ```shell
