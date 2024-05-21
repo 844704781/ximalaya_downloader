@@ -89,6 +89,15 @@ class AbstractDownloader {
                     }
                     return resolve()
                 });
+            } else if (process.platform === 'win32') {
+                // 使用 taskkill 命令终止进程
+                exec(`taskkill /IM PhotosApp.exe /F`, (err) => {
+                    if (err) {
+                        log.error('Error closing the image viewer:', err);
+                        return reject(err)
+                    }
+                    return resolve()
+                });
             } else {
                 kill(openProcess.pid, 'SIGKILL', (err) => {
                     if (err) {
@@ -160,7 +169,12 @@ class AbstractDownloader {
         }
 
         //处理登录成功
-        await this._killQrCode(openProcess);
+        try{
+            await this._killQrCode(openProcess);
+        }catch (e){
+            log.debug(e)
+            log.info(this.deviceType, "扫码已成功，可自行关闭图片程序")
+        }
         fs.writeFileSync(this.cookiePath, Buffer.from(JSON.stringify(cookies)))
         log.info(this.deviceType, "登录成功")
         const user = await this._getCurrentUser()
