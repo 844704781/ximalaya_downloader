@@ -48,7 +48,7 @@ function buildHeaders(referer, cookie) {
 
 
 function parseCookies(cookieArray) {
-    const cookies = cookieArray.map(cookieStr => {
+    const cookies = cookieArray.filter(cookieStr=>cookieStr.trim() != '').map(cookieStr => {
         const cookieParts = cookieStr.split(';').map(part => part.trim());
         const cookieInfo = {};
         cookieParts.forEach(part => {
@@ -94,6 +94,16 @@ function convertCookiesToString(cookies) {
  * @param value
  */
 function addCookie(_cookies, key, value) {
+    if (_cookies.length != 0) {
+        for (const cookiesKey in _cookies) {
+            let item = _cookies[cookiesKey]
+            for (const itemKey in item) {
+                if (itemKey == key) {
+                    return
+                }
+            }
+        }
+    }
     _cookies.push({
         [key]: value,
         "expires": 3863521955000,

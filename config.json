@@ -2,5 +2,15 @@
   "baseUrl": "https://www.ximalaya.com",
   "loginBaseUrl": "https://passport.ximalaya.com",
   "archives": "~/Downloads",
-  "xmd": "~/.xmd"
+  "xmd": "~/.xmd",
+  "cookie": {
+    "www2": {
+      "serverMode": false,
+      "value": ""
+    },
+    "mac": {
+      "serverMode": false,
+      "value": ""
+    }
+  }
 }

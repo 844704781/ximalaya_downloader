@@ -149,31 +149,41 @@ class AbstractDownloader {
      * @returns {Promise<AbstractDownloader>}
      */
     async login() {
-        const qrCode = await this._getQrCode()
-        const qrCodeBuffer = Buffer.from(qrCode.img, 'base64');
-
-        fs.writeFileSync(this.qrCodePath, qrCodeBuffer);
-
-        log.info(this.deviceType, "请使用喜马拉雅APP扫描登录二维码")
-        const openProcess = this._openQrCode();
-        //等待扫码
-        log.info(this.deviceType, "等待登录结果...")
-        let cookies
-        while (true) {
-            const loginResult = await this._getLoginResult(qrCode.qrId)
-            if (loginResult.isSuccess) {
-                cookies = loginResult.cookies
-                break
+        // TODO 如果config中没有的cookies的话，就扫码获取
+        let cookies = null
+        if (config.cookie != null
+            && config.cookie[this.deviceType] != null
+            && config.cookie[this.deviceType]['serverMode']) {
+            if (config.cookie[this.deviceType].value == null || config.cookie[this.deviceType].value.trim() == '') {
+                throw new CustomError(`当前为非扫码模式，请在config.json中手动配置cookie.${this.deviceType}.value的值`)
             }
-            await sleep(2000)
-        }
+            cookies = parseCookies(config.cookie[this.deviceType].value.split(';'))
+        } else {
+            const qrCode = await this._getQrCode()
+            const qrCodeBuffer = Buffer.from(qrCode.img, 'base64');
 
-        //处理登录成功
-        try{
-            await this._killQrCode(openProcess);
-        }catch (e){
-            log.debug(e)
-            log.info(this.deviceType, "扫码已成功，可自行关闭图片程序")
+            fs.writeFileSync(this.qrCodePath, qrCodeBuffer);
+
+            log.info(this.deviceType, "请使用喜马拉雅APP扫描登录二维码")
+            const openProcess = this._openQrCode();
+            //等待扫码
+            log.info(this.deviceType, "等待登录结果...")
+            while (true) {
+                const loginResult = await this._getLoginResult(qrCode.qrId)
+                if (loginResult.isSuccess) {
+                    cookies = loginResult.cookies
+                    break
+                }
+                await sleep(2000)
+            }
+
+            //处理登录成功
+            try{
+                await this._killQrCode(openProcess);
+            }catch (e){
+                log.debug(e)
+                log.info(this.deviceType, "扫码已成功，可自行关闭图片程序")
+            }
         }
         fs.writeFileSync(this.cookiePath, Buffer.from(JSON.stringify(cookies)))
         log.info(this.deviceType, "登录成功")
