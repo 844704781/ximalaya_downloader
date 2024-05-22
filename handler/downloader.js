@@ -87,7 +87,9 @@ class DownloaderFactory {
         if (_downloads.length == 0) {
             return null
         }
-        return downloads[downloads.length - 1]
+        const item = downloads[downloads.length - 1]
+        item.isLimit = false
+        return item
     }
 
     _getNextHoursMinutes() {
