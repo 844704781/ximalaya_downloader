@@ -134,7 +134,7 @@ class AbstractDownloader {
             throw new Error('数据为空');
         }
         if (response.data.ret != 0) {
-            log.error("喜马拉雅内部异常", response.data)
+            log.warn("喜马拉雅内部异常", response.data)
             throw new Error("喜马拉雅内部异常")
         }
         return {
@@ -387,11 +387,11 @@ class AbstractDownloader {
             throw new Error('数据为空');
         }
         if (response.data.ret == 999 || response.data.ret == 1001) {
-            log.error(`${this.deviceType}端喜马拉雅接口内部异常`, response.data)
+            log.warn(`${this.deviceType}端喜马拉雅接口内部异常`, response.data)
             throw new CustomError(999, `${this.deviceType}端速率限制`)
         }
         if (response.data.ret != 0) {
-            log.error(`${this.deviceType}端喜马拉雅接口内部异常`, response.data)
+            log.warn(`${this.deviceType}端喜马拉雅接口内部异常`, response.data)
             throw new Error("喜马拉雅内部异常")
         }
         return {
