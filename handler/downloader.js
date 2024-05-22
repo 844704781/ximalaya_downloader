@@ -8,6 +8,7 @@ class DownloaderFactory {
 
     constructor() {
         this.downloaders = []
+        this.delay = 60
     }
 
 
@@ -125,8 +126,8 @@ class DownloaderFactory {
             }
         }
 
-        const delayTime = (this._getNextHoursMinutes() + 10) * 60 * 1000
-        log.error(`所有下载方式都受限了，${delayTime / 60000}分钟后会自动重试哦`)
+        const delayTime = (this.delay+=2) * 60 * 1000
+        log.warn(`所有下载方式都受限了，${delayTime / 60000}分钟后会自动重试哦`)
         await sleep(delayTime)
     }
 
