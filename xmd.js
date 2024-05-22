@@ -189,7 +189,7 @@ async function main() {
     }
     const condition = {"albumId": albumId, path: null}
 
-    await taskCount.set(await trackDB.count({}))
+    await taskCount.set(await trackDB.count({"albumId": albumId}))
     await finishCount.set(await trackDB.count({
         "albumId": albumId,
         "path": {
@@ -197,10 +197,15 @@ async function main() {
         }
     }))
     await printProgress()
+    if (await taskCount.get() == await finishCount.get()) {
+        log.info("已经下载完成")
+        return
+    }
     log.info("数据加载中...️")
     while (true) {
         const tracks = await trackDB.find(condition, {"num": 1}, !options.slow ? options.concurrency * 2 : 1)
         if (tracks.length == 0) {
+            log.info("已经下载完成")
             break
         }
         const promises = tracks.map(track =>

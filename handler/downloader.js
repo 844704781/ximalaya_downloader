@@ -66,24 +66,10 @@ class DownloaderFactory {
      * @returns {Promise<*>}
      */
     async getDownloader(type, cb) {
+
         if (this.downloaders.length == 0) {
             await this._login(type)
         }
-
-        //const downloads = Object.assign([], this.downloaders)
-        // /**
-        //  * 从downloads随机pop一个元素
-        //  * @param downloads
-        //  * @returns {*}
-        //  * @private
-        //  */
-        // let _getRandomItem = (_downloads) => {
-        //     if (_downloads.length == 0) {
-        //         return {}
-        //     }
-        //     const randomIndex = Math.floor(Math.random() * _downloads.length);
-        //     return _downloads.splice(randomIndex, 1)[0];
-        // };
         for (let i = 0; i < this.downloaders.length; i++) {
             //const item = _getRandomItem(downloads)
             const item = this.downloaders[i]
