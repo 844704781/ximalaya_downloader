@@ -123,7 +123,7 @@ class DownloaderFactory {
             }
         }
 
-        const delayTime = (this._getNextHoursMinutes() + 1) * 60 * 1000
+        const delayTime = (this._getNextHoursMinutes() + 10) * 60 * 1000
         log.error(`所有下载方式都受限了，${delayTime / 60000}分钟后会自动重试哦`)
         await sleep(delayTime)
     }
