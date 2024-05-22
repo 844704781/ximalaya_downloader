@@ -1,6 +1,7 @@
 import {WebSiteDownloader} from '../handler/webSiteDownloader.js'
 import {DarwinDownloader} from '../handler/DarwinDownloader.js'
 import {log} from '../common/log4jscf.js'
+import {sleep} from "../common/utils";
 
 class DownloaderFactory {
 
@@ -57,6 +58,30 @@ class DownloaderFactory {
             log.info(`登录${downloader.deviceType}中...`)
             await downloader.login()
         }
+    }
+
+
+    async _getItem(downloads) {
+        for (let i = downloads.length - 1; i >= 0; i--) {
+            let item = downloads[i]
+            if (item.isLimit) {
+                continue
+            }
+            let max = Math.floor(100 / (downloads.length - i))
+            while (await item.executeCounter.get() < max) {
+                await sleep(80)
+                await item.executeCounter.increment()
+                return item
+            }
+        }
+        for (const download of downloads) {
+            await download.executeCounter.set(0);
+        }
+        const _downloads = downloads.filter(download => download.isLimit == false)
+        if (_downloads.length == 0) {
+            return null
+        }
+        return downloads[downloads.length - 1]
     }
 
     /**
