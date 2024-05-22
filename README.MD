@@ -71,7 +71,7 @@ Options:
 ```
 #### 配置文件相关参数介绍
 config.json
-```json
+```javascript
 {
   "baseUrl": "https://www.ximalaya.com", //主要参数，不能修改
   "loginBaseUrl": "https://passport.ximalaya.com",//主要参数，不能修改
