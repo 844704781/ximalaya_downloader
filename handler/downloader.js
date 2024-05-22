@@ -2,6 +2,7 @@ import {WebSiteDownloader} from '../handler/webSiteDownloader.js'
 import {DarwinDownloader} from '../handler/darwinDownloader.js'
 import {log} from '../common/log4jscf.js'
 import {sleep} from "../common/utils.js";
+import {AtomicInteger} from "../common/AtomicInteger.js";
 
 class DownloaderFactory {
 
@@ -29,21 +30,26 @@ class DownloaderFactory {
         if (type == null) {
             this.downloaders.push({
                 isLimit: false,
-                downloader: new WebSiteDownloader()
+                downloader: new WebSiteDownloader(),
+                executeCounter: new AtomicInteger(0)
+
             })
             this.downloaders.push({
                 isLimit: false,
-                downloader: new DarwinDownloader()
+                downloader: new DarwinDownloader(),
+                executeCounter: new AtomicInteger(0)
             })
         } else if (type == 'pc') {
             this.downloaders.push({
                 isLimit: false,
-                downloader: new DarwinDownloader()
+                downloader: new DarwinDownloader(),
+                executeCounter: new AtomicInteger(0)
             })
         } else if (type == 'web') {
             this.downloaders.push({
                 isLimit: false,
-                downloader: new WebSiteDownloader()
+                downloader: new WebSiteDownloader(),
+                executeCounter: new AtomicInteger(0)
             })
         } else {
             throw new Error(`暂不支持: ${type} 这种登录方式`)
@@ -84,6 +90,12 @@ class DownloaderFactory {
         return downloads[downloads.length - 1]
     }
 
+    _getNextHoursMinutes() {
+        const now = new Date();
+        const minutes = now.getMinutes();
+        return 60 - minutes;
+    }
+
     /**
      * 回调中获取下载器
      * @param type
@@ -91,13 +103,15 @@ class DownloaderFactory {
      * @returns {Promise<*>}
      */
     async getDownloader(type, cb) {
-
         if (this.downloaders.length == 0) {
             await this._login(type)
         }
         for (let i = 0; i < this.downloaders.length; i++) {
-            //const item = _getRandomItem(downloads)
-            const item = this.downloaders[i]
+            const item = await this._getItem(this.downloaders)
+            //const item = this.downloaders[i]
+            if (item == null) {
+                break
+            }
             if (item.isLimit) {
                 continue
             }
@@ -108,8 +122,8 @@ class DownloaderFactory {
                 continue
             }
         }
-        log.error("所有下载方式都受限了，可以一个小时后后再过来试试哦")
-        throw new Error("所有下载方式都受限了，可以一个小时后后再过来试试哦")
+        log.error(`所有下载方式都受限了，${this._getNextHoursMinutes() + 1}分钟后会自动重试哦`)
+        await sleep((this._getNextHoursMinutes() + 1) * 1000)
     }
 
 }

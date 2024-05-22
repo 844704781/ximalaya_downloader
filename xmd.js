@@ -72,12 +72,17 @@ async function download(factory, options, album, track) {
         mkdirpSync(targetDir)
     }
 
-    const {data, deviceType} = await factory.getDownloader(options.type, async downloader => {
+    const downloadResp = await factory.getDownloader(options.type, async downloader => {
         return {
             data: await downloader.download(track.trackId),
             deviceType: downloader.deviceType
         }
     })
+    if (downloadResp == null) {
+        return
+    }
+    const data = downloadResp.data
+    const deviceType = downloadResp.deviceType
     const filePath = path.join(targetDir, track.num + "." + cleanedStr(track.title) + data.extension)
     fs.writeFileSync(filePath, data.buffer)
     await trackDB.update({'trackId': track.trackId}, {'path': filePath})
