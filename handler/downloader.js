@@ -1,7 +1,7 @@
 import {WebSiteDownloader} from '../handler/webSiteDownloader.js'
 import {DarwinDownloader} from '../handler/DarwinDownloader.js'
 import {log} from '../common/log4jscf.js'
-import {sleep} from "../common/utils";
+import {sleep} from "../common/utils.js";
 
 class DownloaderFactory {
 
