@@ -1,6 +1,6 @@
-import {AbstractDownloader} from '../handler/abstractDownloader.js'
-import {convertCookiesToString, addCookie} from '../common/utils.js'
-import {decrypt} from "../handler/core/www2-decrypt.js"
+import {AbstractDownloader} from './abstractDownloader.mjs'
+import {convertCookiesToString, addCookie} from '../common/utils.mjs'
+import {decrypt} from "./core/www2-decrypt.mjs"
 
 /**
  * 网站登录类

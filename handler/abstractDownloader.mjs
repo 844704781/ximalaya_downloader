@@ -1,12 +1,12 @@
-import {iaxios} from '../common/axioscf.js'
-import {config} from '../common/config.js'
-import {log} from '../common/log4jscf.js'
-import {sleep, buildHeaders, parseCookies} from '../common/utils.js'
+import {iaxios} from '../common/axioscf.mjs'
+import {config} from '../common/config.mjs'
+import {log} from '../common/log4jscf.mjs'
+import {sleep, buildHeaders, parseCookies} from '../common/utils.mjs'
 import path from "path";
 import fs from "fs";
 import {exec, spawn} from "child_process";
 import kill from "tree-kill";
-import {CustomError} from '../common/error.js'
+import {CustomError} from '../common/error.mjs'
 import os from 'os'
 
 /**

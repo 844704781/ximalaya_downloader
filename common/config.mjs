@@ -1,5 +1,5 @@
 import fs from "fs";
-import {projectRoot} from "../settings.js";
+import {projectRoot} from "../settings.mjs";
 
 let _config = {
   "baseUrl": "https://www.ximalaya.com",

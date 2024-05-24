@@ -1,5 +1,5 @@
 import Datastore from 'nedb'
-import {config} from "../common/config.js";
+import {config} from "../common/config.mjs";
 import os from 'os'
 import path from 'path'
 
@@ -13,10 +13,10 @@ const db = new Datastore({
 });
 
 
-const albumDB = {}
+const albumdb = {}
 
 // 插入数据
-albumDB.insert = (entity) => {
+albumdb.insert = (entity) => {
     return new Promise((resolve, reject) => {
         db.insert(entity, (err, newDoc) => {
             if (err) {
@@ -28,7 +28,7 @@ albumDB.insert = (entity) => {
     })
 }
 
-albumDB.count = (query) => {
+albumdb.count = (query) => {
     // 计算符合条件的文档数量
     return new Promise((resolve, reject) => {
         db.count(query, (err, count) => {
@@ -41,7 +41,7 @@ albumDB.count = (query) => {
     });
 };
 
-albumDB.find = (entity, sort, limit) => {
+albumdb.find = (entity, sort, limit) => {
     // 查找数据
     return new Promise((resolve, reject) => {
         let query = db.find(entity);
@@ -61,7 +61,7 @@ albumDB.find = (entity, sort, limit) => {
     });
 };
 
-albumDB.findOne = (query) => {
+albumdb.findOne = (query) => {
     return new Promise((resolve, reject) => {
         db.findOne(query, (err, doc) => {
             if (err) {
@@ -74,7 +74,7 @@ albumDB.findOne = (query) => {
 };
 
 
-albumDB.update = (condition, setEntity) => {
+albumdb.update = (condition, setEntity) => {
     // 更新数据
     return new Promise((resolve, reject) => {
         db.update(condition, {$set: setEntity}, (err, numReplaced) => {
@@ -88,7 +88,7 @@ albumDB.update = (condition, setEntity) => {
 }
 
 // 删除数据
-albumDB.remove = (condition) => {
+albumdb.remove = (condition) => {
     return new Promise((resolve, reject) => {
         db.remove(condition, {}, (err, numReplaced) => {
             if (err) {
@@ -100,5 +100,5 @@ albumDB.remove = (condition) => {
     })
 }
 export {
-    albumDB
+    albumdb
 }
