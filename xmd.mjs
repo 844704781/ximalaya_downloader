@@ -1,13 +1,13 @@
 #!/usr/bin/env node
-import {config} from './common/config.js'
+import {config} from './common/config.mjs'
 import pLimit from 'p-limit';
-import {log} from './common/log4jscf.js'
-import {trackDB} from './db/trackdb.js'
-import {albumDB} from './db/albumdb.js'
+import {log} from './common/log4jscf.mjs'
+import {trackdb} from './db/trackdb.mjs'
+import {albumdb} from './db/albumdb.mjs'
 import {program, InvalidArgumentError} from "commander"
-import {AtomicInteger} from './common/AtomicInteger.js'
-import {sleep} from './common/utils.js'
-import {DownloaderFactory} from './handler/downloader.js'
+import {AtomicInteger} from './common/AtomicInteger.mjs'
+import {sleep} from './common/utils.mjs'
+import {DownloaderFactory} from './handler/downloader.mjs'
 import os from "os";
 import fs from "fs";
 import path from 'path'
@@ -85,7 +85,7 @@ async function download(factory, options, album, track) {
     const deviceType = downloadResp.deviceType
     const filePath = path.join(targetDir, track.num + "." + cleanedStr(track.title) + data.extension)
     fs.writeFileSync(filePath, data.buffer)
-    await trackDB.update({'trackId': track.trackId}, {'path': filePath})
+    await trackdb.update({'trackId': track.trackId}, {'path': filePath})
     await finishCount.increment()
     await printProgress(track.title, filePath, deviceType)
 }
@@ -107,7 +107,7 @@ async function main() {
     const options = program.opts();
     const albumId = options.albumId
     if (albumId == null || albumId.trim() == '') {
-        log.error("要输入 albumId 哦，尝试输入 node xmd.js --help 查看使用说明吧😞")
+        log.error("要输入 albumId 哦，尝试输入 node xmd.mjs --help 查看使用说明吧😞")
         return
     }
     if (options.replace) {
@@ -140,7 +140,7 @@ async function main() {
     })
 
     log.info(`当前专辑:${albumResp.albumTitle},总章节数:${albumResp.trackCount}`)
-    let album = await albumDB.findOne({"albumId": albumId})
+    let album = await albumdb.findOne({"albumId": albumId})
     let needFlushTracks = true
 
     if (album == null) {
@@ -150,16 +150,16 @@ async function main() {
             "isFinished": albumResp.isFinished,//0:不间断更新 1:连载中 2:完结
             "trackCount": albumResp.trackCount
         }
-        await albumDB.insert(album)
+        await albumdb.insert(album)
     } else {
-        await albumDB.update({'albumId': albumId}, {
+        await albumdb.update({'albumId': albumId}, {
             "isFinished": album.isFinished,
             "trackCount": album.trackCount
         })
         album = albumResp
     }
 
-    const iTrackCount = await trackDB.count({'albumId': albumId})
+    const iTrackCount = await trackdb.count({'albumId': albumId})
     if (album.trackCount == iTrackCount) {
         needFlushTracks = false
     }
@@ -177,9 +177,9 @@ async function main() {
             for (let index in book.tracks) {
                 num++
                 let track = book.tracks[index]
-                const _track = await trackDB.findOne({'trackId': track.trackId})
+                const _track = await trackdb.findOne({'trackId': track.trackId})
                 if (_track == null) {
-                    await trackDB.insert({
+                    await trackdb.insert({
                         "trackId": track.trackId,
                         "title": track.title,
                         "albumId": albumId,
@@ -194,8 +194,8 @@ async function main() {
     }
     const condition = {"albumId": albumId, path: null}
 
-    await taskCount.set(await trackDB.count({"albumId": albumId}))
-    await finishCount.set(await trackDB.count({
+    await taskCount.set(await trackdb.count({"albumId": albumId}))
+    await finishCount.set(await trackdb.count({
         "albumId": albumId,
         "path": {
             $ne: null
@@ -208,7 +208,7 @@ async function main() {
     }
     log.info("数据加载中...️")
     while (true) {
-        const tracks = await trackDB.find(condition, {"num": 1}, !options.slow ? options.concurrency * 2 : 1)
+        const tracks = await trackdb.find(condition, {"num": 1}, !options.slow ? options.concurrency * 2 : 1)
         if (tracks.length == 0) {
             log.info("已经下载完成")
             break

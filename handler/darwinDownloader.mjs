@@ -1,6 +1,6 @@
-import {AbstractDownloader} from '../handler/abstractDownloader.js'
-import {convertCookiesToString, addCookie} from '../common/utils.js'
-import {decrypt} from "../handler/core/mac-decrypt.js"
+import {AbstractDownloader} from './abstractDownloader.mjs'
+import {convertCookiesToString, addCookie} from '../common/utils.mjs'
+import {decrypt} from "./core/mac-decrypt.mjs"
 
 /**
  * PC端登录类

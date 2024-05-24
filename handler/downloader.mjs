@@ -1,8 +1,8 @@
-import {WebSiteDownloader} from '../handler/webSiteDownloader.js'
-import {DarwinDownloader} from '../handler/darwinDownloader.js'
-import {log} from '../common/log4jscf.js'
-import {sleep} from "../common/utils.js";
-import {AtomicInteger} from "../common/AtomicInteger.js";
+import {WebSiteDownloader} from './webSiteDownloader.mjs'
+import {DarwinDownloader} from './darwinDownloader.mjs'
+import {log} from '../common/log4jscf.mjs'
+import {sleep} from "../common/utils.mjs";
+import {AtomicInteger} from "../common/AtomicInteger.mjs";
 
 class DownloaderFactory {
 

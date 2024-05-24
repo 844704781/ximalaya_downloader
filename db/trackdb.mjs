@@ -1,5 +1,5 @@
 import Datastore from 'nedb'
-import {config} from '../common/config.js'
+import {config} from '../common/config.mjs'
 import os from 'os'
 import path from 'path'
 /**
@@ -12,10 +12,10 @@ const db = new Datastore({
 });
 
 
-const trackDB = {}
+const trackdb = {}
 
 // 插入数据
-trackDB.insert = (entity) => {
+trackdb.insert = (entity) => {
     return new Promise((resolve, reject) => {
         db.insert(entity, (err, newDoc) => {
             if (err) {
@@ -27,7 +27,7 @@ trackDB.insert = (entity) => {
     })
 }
 
-trackDB.count = (query) => {
+trackdb.count = (query) => {
     // 计算符合条件的文档数量
     return new Promise((resolve, reject) => {
         db.count(query, (err, count) => {
@@ -40,7 +40,7 @@ trackDB.count = (query) => {
     });
 };
 
-trackDB.find = (entity, sort, limit) => {
+trackdb.find = (entity, sort, limit) => {
     // 查找数据
     return new Promise((resolve, reject) => {
         let query = db.find(entity);
@@ -60,7 +60,7 @@ trackDB.find = (entity, sort, limit) => {
     });
 };
 
-trackDB.findOne = (query) => {
+trackdb.findOne = (query) => {
     return new Promise((resolve, reject) => {
         db.findOne(query, (err, doc) => {
             if (err) {
@@ -73,7 +73,7 @@ trackDB.findOne = (query) => {
 };
 
 
-trackDB.update = (condition, setEntity) => {
+trackdb.update = (condition, setEntity) => {
     // 更新数据
     return new Promise((resolve, reject) => {
         db.update(condition, {$set: setEntity}, (err, numReplaced) => {
@@ -87,7 +87,7 @@ trackDB.update = (condition, setEntity) => {
 }
 
 // 删除数据
-trackDB.remove = (condition) => {
+trackdb.remove = (condition) => {
     return new Promise((resolve, reject) => {
         db.remove(condition, {}, (err, numReplaced) => {
             if (err) {
@@ -99,5 +99,5 @@ trackDB.remove = (condition) => {
     })
 }
 export {
-    trackDB
+    trackdb
 }
