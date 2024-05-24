@@ -16,7 +16,6 @@
     "axios-retry": "^4.2.0",
     "commander": "^12.0.0",
     "crypto-js": "^4.2.0",
-    "fake-ua": "^1.0.4",
     "log4js": "^6.9.1",
     "mkdirp": "^3.0.1",
     "nedb": "^1.8.0",
