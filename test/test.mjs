@@ -1,4 +1,4 @@
-// import {sleep} from '../common/utils.mjs'
+// import {sleep} from '../common/utils.js'
 //
 // const _downloads = [{
 //     isLimit: false,
@@ -53,7 +53,7 @@
 //
 // }
 
-import {sleep} from "../common/utils.mjs";
+import {sleep} from "../common/utils.js";
 
 /**
  * 统计:

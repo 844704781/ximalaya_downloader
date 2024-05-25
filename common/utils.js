@@ -12,16 +12,10 @@ function httpCookie(cookies) {
     }).join('; ');
 }
 
-
 const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
 const UA = '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"'
 const PLATFORM = '"macOS"'
 
-
-/**
- *
- * @param referer 'https://www.ximalaya.com'
- */
 function buildHeaders(referer, cookie) {
     if (typeof cookie !== 'string') {
         throw new Error('Cookie must be string')
@@ -46,7 +40,6 @@ function buildHeaders(referer, cookie) {
     return headers
 }
 
-
 function parseCookies(cookieArray) {
     const cookies = cookieArray.filter(cookieStr => cookieStr.trim() != '').map(cookieStr => {
         const cookieParts = cookieStr.split(';').map(part => part.trim());
@@ -67,11 +60,6 @@ function parseCookies(cookieArray) {
     return cookies;
 }
 
-/**
- * 将cookie文件中的格式转成请求可用的cookie格式
- * @param cookies
- * @returns {string}
- */
 function convertCookiesToString(cookies) {
     const parts = [];
 
@@ -87,12 +75,6 @@ function convertCookiesToString(cookies) {
     return parts.join('; ');
 }
 
-/**
- * 在cookie文件中数据动态追加数据
- * @param _cookies
- * @param key
- * @param value
- */
 function addCookie(_cookies, key, value) {
     if (_cookies.length != 0) {
         for (const cookiesKey in _cookies) {
@@ -131,7 +113,6 @@ const isElectron = () => {
     return false;
 };
 
-
-export {
+module.exports = {
     sleep, httpCookie, buildHeaders, parseCookies, convertCookiesToString, addCookie, isElectron
-}
+};

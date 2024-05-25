@@ -1,32 +1,24 @@
-import {AbstractDownloader} from './abstractDownloader.mjs'
-import {convertCookiesToString, addCookie} from '../common/utils.mjs'
-import {decrypt} from "./core/www2-decrypt.mjs"
+const { AbstractDownloader } = require('./abstractDownloader.js');
+const { convertCookiesToString, addCookie } = require('../common/utils.js');
+const { decrypt } = require('./core/www2-decrypt.js');
 
-/**
- * 网站登录类
- */
 class WebSiteDownloader extends AbstractDownloader {
     constructor() {
         super('www2');
-        this.clientName = "喜马拉雅网页端"
+        this.clientName = "喜马拉雅网页端";
     }
 
     async _getQrCode() {
-        return this.__getQrCode(this.clientName)
+        return this.__getQrCode(this.clientName);
     }
 
-    /**
-     * 获取可用cookie
-     * @returns {Promise<*>}
-     * @private
-     */
     async _getCookies() {
         if (this.cookies) {
-            return this.cookies
+            return this.cookies;
         }
-        const cookies = await this.__readCookies()
+        const cookies = await this.__readCookies();
         if (cookies == null) {
-            return null
+            return null;
         }
         addCookie(cookies, '_xmLog', 'h5&85125320-3c87-43c0-8228-f43734d4bddf&2.4.15-alpha.2');
         addCookie(cookies, 'wfp', 'ACM4MzBmMDg3ODg2OTc4NmRho0-cwtmso-54bXdlYl93d3c');
@@ -37,32 +29,29 @@ class WebSiteDownloader extends AbstractDownloader {
         addCookie(cookies, 'Hm_lpvt_4a7d8ec50cfd6af753c4f8aee3425070', Math.floor(Date.now() / 1000));
         addCookie(cookies, 'web_login', Date.now());
 
-        this.cookies = convertCookiesToString(cookies)
-        return this.cookies
+        this.cookies = convertCookiesToString(cookies);
+        return this.cookies;
     }
 
     _decrypt(encodeText) {
-        const url = decrypt.getSoundCryptLink({deviceType: this.deviceType, link: encodeText})
-        return url
+        const url = decrypt.getSoundCryptLink({ deviceType: this.deviceType, link: encodeText });
+        return url;
     }
-
 }
-
 
 async function test() {
-    const downloader = new WebSiteDownloader()
+    const downloader = new WebSiteDownloader();
     if (!await downloader.isLogin()) {
-        await downloader.login()
+        await downloader.login();
     }
-    const album = await downloader.getAlbum(33476331)
-    const trackPageResult = await downloader.getTracksList(33476331, 1, 1)
-    const data = await downloader.download(trackPageResult.tracks[0].trackId)
-    console.log(data)
+    const album = await downloader.getAlbum(33476331);
+    const trackPageResult = await downloader.getTracksList(33476331, 1, 1);
+    const data = await downloader.download(trackPageResult.tracks[0].trackId);
+    console.log(data);
 }
-
 
 // test()
 
-export {
+module.exports = {
     WebSiteDownloader
-}
+};

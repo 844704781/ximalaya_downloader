@@ -1,13 +1,13 @@
 #!/usr/bin/env node
-import {config} from './common/config.mjs'
+import {config} from './common/config.js'
 import pLimit from 'p-limit';
-import {log} from './common/log4jscf.mjs'
-import {trackdb} from './db/trackdb.mjs'
-import {albumdb} from './db/albumdb.mjs'
+import {log} from './common/log4jscf.js'
+import {trackdb} from './db/trackdb.js'
+import {albumdb} from './db/albumdb.js'
 import {program, InvalidArgumentError} from "commander"
-import {AtomicInteger} from './common/AtomicInteger.mjs'
-import {sleep} from './common/utils.mjs'
-import {DownloaderFactory} from './handler/downloader.mjs'
+import {AtomicInteger} from './common/AtomicInteger.js'
+import {sleep} from './common/utils.js'
+import {DownloaderFactory} from './handler/downloader.js'
 import os from "os";
 import fs from "fs";
 import path from 'path'
@@ -107,7 +107,7 @@ async function main() {
     const options = program.opts();
     const albumId = options.albumId
     if (albumId == null || albumId.trim() == '') {
-        log.error("要输入 albumId 哦，尝试输入 node xmd.mjs --help 查看使用说明吧😞")
+        log.error("要输入 albumId 哦，尝试输入 node xmd.js --help 查看使用说明吧😞")
         return
     }
     if (options.replace) {

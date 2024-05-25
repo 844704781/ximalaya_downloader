@@ -1,5 +1,5 @@
-import axios from 'axios'
-import axiosRetry from "axios-retry"
+const axios = require('axios');
+const axiosRetry = require('axios-retry').default;
 
 axiosRetry(axios, {
     retries: 3,
@@ -9,4 +9,8 @@ axiosRetry(axios, {
     }
 });
 
-export const iaxios = axios
+const iaxios = axios;
+
+module.exports = {
+    iaxios
+};

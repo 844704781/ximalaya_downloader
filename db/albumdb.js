@@ -1,34 +1,28 @@
-import Datastore from 'nedb'
-import {config} from '../common/config.mjs'
-import os from 'os'
-import path from 'path'
-/**
- * 记录专辑
- */
+const Datastore = require('nedb');
+const { config } = require('../common/config.js');
+const os = require('os');
+const path = require('path');
 
 const db = new Datastore({
-    filename : path.join(config.xmd.replace('~', os.homedir()),'db','file','track.db'),
+    filename : path.join(config.xmd.replace('~', os.homedir()), 'db', 'file', 'album.db'),
     autoload: true
 });
 
+const albumdb = {};
 
-const trackdb = {}
-
-// 插入数据
-trackdb.insert = (entity) => {
+albumdb.insert = (entity) => {
     return new Promise((resolve, reject) => {
         db.insert(entity, (err, newDoc) => {
             if (err) {
-                return reject(err)
+                return reject(err);
             } else {
-                return resolve(newDoc)
+                return resolve(newDoc);
             }
         });
-    })
-}
+    });
+};
 
-trackdb.count = (query) => {
-    // 计算符合条件的文档数量
+albumdb.count = (query) => {
     return new Promise((resolve, reject) => {
         db.count(query, (err, count) => {
             if (err) {
@@ -40,15 +34,14 @@ trackdb.count = (query) => {
     });
 };
 
-trackdb.find = (entity, sort, limit) => {
-    // 查找数据
+albumdb.find = (entity, sort, limit) => {
     return new Promise((resolve, reject) => {
         let query = db.find(entity);
         if (limit) {
             query = query.limit(limit);
         }
-        if (sort){
-            query.sort(sort)
+        if (sort) {
+            query.sort(sort);
         }
         query.exec((err, docs) => {
             if (err) {
@@ -60,7 +53,7 @@ trackdb.find = (entity, sort, limit) => {
     });
 };
 
-trackdb.findOne = (query) => {
+albumdb.findOne = (query) => {
     return new Promise((resolve, reject) => {
         db.findOne(query, (err, doc) => {
             if (err) {
@@ -72,32 +65,30 @@ trackdb.findOne = (query) => {
     });
 };
 
-
-trackdb.update = (condition, setEntity) => {
-    // 更新数据
+albumdb.update = (condition, setEntity) => {
     return new Promise((resolve, reject) => {
-        db.update(condition, {$set: setEntity}, (err, numReplaced) => {
+        db.update(condition, { $set: setEntity }, (err, numReplaced) => {
             if (err) {
-                return reject(err)
+                return reject(err);
             } else {
-                return resolve(numReplaced)
+                return resolve(numReplaced);
             }
         });
-    })
-}
+    });
+};
 
-// 删除数据
-trackdb.remove = (condition) => {
+albumdb.remove = (condition) => {
     return new Promise((resolve, reject) => {
         db.remove(condition, {}, (err, numReplaced) => {
             if (err) {
-                return reject(err)
+                return reject(err);
             } else {
-                return resolve(numReplaced)
+                return resolve(numReplaced);
             }
         });
-    })
-}
-export {
-    trackdb
-}
+    });
+};
+
+module.exports = {
+    albumdb
+};

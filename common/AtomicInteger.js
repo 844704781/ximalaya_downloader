@@ -1,4 +1,4 @@
-import {Mutex} from 'async-mutex';
+const { Mutex } = require('async-mutex');
 
 class _AtomicInteger {
     constructor(initialValue = 0) {
@@ -24,7 +24,6 @@ class _AtomicInteger {
         });
     }
 
-
     async set(initialValue = 0) {
         return this._mutex.runExclusive(async () => {
             this._value = initialValue;
@@ -32,4 +31,6 @@ class _AtomicInteger {
     }
 }
 
-export const AtomicInteger = _AtomicInteger
+module.exports = {
+    AtomicInteger: _AtomicInteger
+};

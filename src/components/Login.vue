@@ -27,15 +27,17 @@
 <script>
 import {reactive, onMounted} from 'vue';
 import logoPath from '../assets/logo.png';
-import {WebSiteDownloader} from "../../handler/webSiteDownloader.mjs";
-import {DarwinDownloader} from "../../handler/darwinDownloader.mjs";
-import fs from "fs";
-import {log} from "../../common/log4jscf.mjs";
+// import {WebSiteDownloader} from "../../handler/webSiteDownloader.js";
+// import {DarwinDownloader} from "../../handler/darwinDownloader.js";
+// import {log} from "../../common/log4jscf.js";
 
 export default {
   name: "Login",
   setup() {
     const fit = 'contain';
+    class WebSiteDownloader{}
+    class DarwinDownloader{}
+
     const list = reactive([
       {downloader: new WebSiteDownloader(), url: null, qrId: null, isLogin: false, tag: 'Web端登录'},
       {downloader: new DarwinDownloader(), url: null, qrId: null, isLogin: false, tag: 'PC端登录'}
@@ -78,7 +80,8 @@ export default {
 
 
     onMounted(async () => {
-      await loadQrCode();
+      // await loadQrCode();
+      console.log(window.downloader)
     });
 
     return {

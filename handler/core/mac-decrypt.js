@@ -1,4 +1,4 @@
-import CryptoJS from 'crypto-js'
+const CryptoJS = require('crypto-js');
 
 function getSoundCryptLink(ciphertext) {
     const key = CryptoJS.enc.Hex.parse('aaad3e4fd540b0f79dca95606e72bf93');
@@ -43,6 +43,8 @@ let headers = {
 // console.log(decryptedText);
 
 
-export const decrypt={
+const decrypt = {
     getSoundCryptLink
-}
+};
+
+module.exports = decrypt;

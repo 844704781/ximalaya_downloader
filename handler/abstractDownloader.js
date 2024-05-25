@@ -1,13 +1,14 @@
-import {iaxios} from '../common/axioscf.mjs'
-import {config} from '../common/config.mjs'
-import {log} from '../common/log4jscf.mjs'
-import {sleep, buildHeaders, parseCookies, isElectron} from '../common/utils.mjs'
-import path from "path";
-import fs from "fs";
-import {exec, spawn} from "child_process";
-import kill from "tree-kill";
-import {CustomError} from '../common/error.mjs'
-import os from 'os'
+const { iaxios } = require('../common/axioscf.js');
+const { config } = require('../common/config.js');
+const { log } = require('../common/log4jscf.js');
+const { sleep, buildHeaders, parseCookies, isElectron } = require('../common/utils.js');
+const path = require('path');
+const fs = require('fs');
+const { exec, spawn } = require('child_process');
+const kill = require('tree-kill');
+const { CustomError } = require('../common/error.js');
+const os = require('os');
+
 
 /**
  * 下载抽象类
@@ -18,8 +19,8 @@ class AbstractDownloader {
             throw new Error("抽象类不能被实例化")
         }
         this.deviceType = deviceType
-        this.cookiePath = path.join(config.xmd.replace('~', os.homedir()), `${deviceType}-cookies.json`)
-        this.qrCodePath = path.join(config.xmd.replace('~', os.homedir()), `${deviceType}-qrcode.png`);
+        this.cookiePath = path.join(config.xmd.replace('~', os.homedir()), deviceType + '-cookies.json');
+        this.qrCodePath = path.join(config.xmd.replace('~', os.homedir()), deviceType + '-qrcode.png');
         this.albumId = null
         this.cookies = null
 
@@ -63,12 +64,13 @@ class AbstractDownloader {
         let command;
 
         if (platform === 'win32') {
-            command = `start ${this.qrCodePath}`;
+            command = 'start ' + this.qrCodePath;
         } else if (platform === 'darwin') {
-            command = `open ${this.qrCodePath}`;
+            command = 'open ' + this.qrCodePath;
         } else if (platform === 'linux') {
-            command = `xdg-open ${this.qrCodePath}`;
+            command = 'xdg-open ' + this.qrCodePath;
         }
+
 
         const openProcess = spawn(command, [], {shell: true});
         return openProcess;
@@ -82,7 +84,7 @@ class AbstractDownloader {
     _killQrCode(openProcess) {
         return new Promise((resolve, reject) => {
             if (process.platform == 'darwin') {
-                exec(`osascript -e 'quit app "Preview"'`, (err) => {
+                exec("osascript -e 'quit app \"Preview\"'", (err) => {
                     if (err) {
                         log.error('Error closing the image viewer:', err);
                         return reject(err)
@@ -91,7 +93,7 @@ class AbstractDownloader {
                 });
             } else if (process.platform === 'win32') {
                 // 使用 taskkill 命令终止进程
-                exec(`taskkill /IM PhotosApp.exe /F`, (err) => {
+                exec('taskkill /IM PhotosApp.exe /F', (err) => {
                     if (err) {
                         log.error('Error closing the image viewer:', err);
                         return reject(err)
@@ -121,10 +123,11 @@ class AbstractDownloader {
 
     /**
      * 获取登录二维码
-     * @returns {Promise<{qrId:int,img:str}>}
+     * @returns {Promise<{qrId:int,img:str}>}`
      */
     async __getQrCode(clientName) {
-        const url = `${config.loginBaseUrl}/web/qrCode/gen?level=L&source=${encodeURIComponent(clientName)}`;
+        const url = config.loginBaseUrl + "/web/qrCode/gen?level=L&source=" + encodeURIComponent(clientName);
+
         const response = await iaxios.get(url)
 
         if (response.status != 200) {
@@ -155,7 +158,7 @@ class AbstractDownloader {
             && config.cookie[this.deviceType] != null
             && config.cookie[this.deviceType]['serverMode']) {
             if (config.cookie[this.deviceType].value == null || config.cookie[this.deviceType].value.trim() == '') {
-                throw new CustomError(`当前为非扫码模式，请在config.json中手动配置cookie.${this.deviceType}.value的值`)
+                throw new CustomError('当前为非扫码模式，请在config.json中手动配置cookie.' + this.deviceType + '.value的值');
             }
             cookies = parseCookies(config.cookie[this.deviceType].value.split(';'))
         } else {
@@ -198,7 +201,8 @@ class AbstractDownloader {
      * @returns {Promise<{cookies: JSONObject, isSuccess: boolean}|{isSuccess: boolean}>}
      */
     async _getLoginResult(qrId) {
-        const url = `${config.loginBaseUrl}/web/qrCode/check/${qrId}/${Date.now()}`;
+        const url = config.loginBaseUrl + '/web/qrCode/check/' + qrId + '/' + Date.now();
+
         const response = await iaxios.get(url)
 
         if (response.status != 200) {
@@ -227,7 +231,7 @@ class AbstractDownloader {
     }
 
     async _getCurrentUser() {
-        const url = `${config.baseUrl}/revision/main/getCurrentUser`
+        const url = config.baseUrl + '/revision/main/getCurrentUser';
         const cookie = await this._getCookies()
         const headers = buildHeaders(config.baseUrl, cookie)
         const response = await iaxios.get(url, {headers: headers})
@@ -286,8 +290,9 @@ class AbstractDownloader {
      * @returns {Promise<*>}
      */
     async _getAlbumSimple(albumId, cookie) {
-        const url = `${config.baseUrl}/revision/album/v1/simple?albumId=${albumId}`
-        const referer = `${config.baseUrl}/album/${albumId}`
+        const url = config.baseUrl + '/revision/album/v1/simple?albumId=' + albumId;
+        const referer = config.baseUrl + '/album/' + albumId;
+
         const headers = buildHeaders(referer, cookie)
         const response = await iaxios.get(url, {headers: headers})
         if (response.status != 200) {
@@ -311,8 +316,9 @@ class AbstractDownloader {
      * @returns {Promise<*>}
      */
     async _getAlbumInfo(albumId, cookie) {
-        const url = `${config.baseUrl}/tdk-web/seo/search/albumInfo?albumId=${albumId}`
-        const referer = `${config.baseUrl}/album/${albumId}`
+        const url = config.baseUrl + '/tdk-web/seo/search/albumInfo?albumId=' + albumId;
+        const referer = config.baseUrl + '/album/' + albumId;
+
         const headers = buildHeaders(referer, cookie)
         const response = await iaxios.get(url, {headers: headers})
         if (response.status != 200) {
@@ -356,8 +362,9 @@ class AbstractDownloader {
      * @returns {Promise<*>}
      */
     async getTracksList(albumId, pageNum, pageSize) {
-        const url = `${config.baseUrl}/revision/album/v1/getTracksList?albumId=${albumId}&pageNum=${pageNum}&pageSize=${pageSize}`
-        const referer = `${config.baseUrl}/album/${albumId}`
+        const url = config.baseUrl + '/revision/album/v1/getTracksList?albumId=' + albumId + '&pageNum=' + pageNum + '&pageSize=' + pageSize;
+        const referer = config.baseUrl + '/album/' + albumId;
+
         const headers = buildHeaders(referer, await this._getCookies())
         const response = await iaxios.get(url, {headers: headers})
         if (response.status != 200) {
@@ -381,8 +388,9 @@ class AbstractDownloader {
      */
     async _getBaseInfo(trackId) {
         const trackQualityLevel = 2
-        const url = `${config.baseUrl}/mobile-playpage/track/v3/baseInfo/${Date.now()}?device=${this.deviceType}&trackId=${trackId}&trackQualityLevel=${trackQualityLevel}`
-        const referer = `${config.baseUrl}/album/${trackId}`
+        const url = config.baseUrl + '/mobile-playpage/track/v3/baseInfo/' + Date.now() + '?device=' + this.deviceType + '&trackId=' + trackId + '&trackQualityLevel=' + trackQualityLevel;
+        const referer = config.baseUrl + '/album/' + trackId;
+
         const headers = buildHeaders(referer, await this._getCookies())
         const response = await iaxios.get(url, {headers: headers})
         if (response.status != 200) {
@@ -391,13 +399,13 @@ class AbstractDownloader {
         if (response.data == null) {
             throw new Error('数据为空');
         }
-        if (response.data.ret == 999 || response.data.ret == 1001) {
-            log.warn(`${this.deviceType}端喜马拉雅接口内部异常`, response.data)
-            throw new CustomError(999, `${this.deviceType}端速率限制`)
+        if (response.data.ret === 999 || response.data.ret === 1001) {
+            log.warn(this.deviceType + '端喜马拉雅接口内部异常', response.data);
+            throw new CustomError(999, this.deviceType + '端速率限制');
         }
-        if (response.data.ret != 0) {
-            log.warn(`${this.deviceType}端喜马拉雅接口内部异常`, response.data)
-            throw new Error("喜马拉雅内部异常")
+        if (response.data.ret !== 0) {
+            log.warn(this.deviceType + '端喜马拉雅接口内部异常', response.data);
+            throw new Error('喜马拉雅内部异常');
         }
         return {
             playUrlList: response.data.trackInfo.playUrlList,
@@ -492,9 +500,7 @@ class AbstractDownloader {
 
 }
 
-
-export {
+module.exports = {
     AbstractDownloader
-}
-
+};
 
