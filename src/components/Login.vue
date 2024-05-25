@@ -27,41 +27,36 @@
 <script>
 import {reactive, onMounted} from 'vue';
 import logoPath from '../assets/logo.png';
-// import {WebSiteDownloader} from "../../handler/webSiteDownloader.js";
-// import {DarwinDownloader} from "../../handler/darwinDownloader.js";
-// import {log} from "../../common/log4jscf.js";
 
 export default {
   name: "Login",
   setup() {
     const fit = 'contain';
-    class WebSiteDownloader{}
-    class DarwinDownloader{}
-
     const list = reactive([
-      {downloader: new WebSiteDownloader(), url: null, qrId: null, isLogin: false, tag: 'Web端登录'},
-      {downloader: new DarwinDownloader(), url: null, qrId: null, isLogin: false, tag: 'PC端登录'}
+      {downloader: window.downloader.web, url: null, qrId: null, isLogin: false, tag: 'Web端登录'},
+      {downloader: window.downloader.pc, url: null, qrId: null, isLogin: false, tag: 'PC端登录'}
     ]);
 
     const abstractGetQrCode = async (downloader) => {
-      const qrCode = await downloader._getQrCode();
-      const websiteCodeBuffer = Buffer.from(qrCode.img, 'base64');
+      const qrCode = await downloader._getQrCodeAsync();
       return {
-        url: 'data:image/jpeg;base64,' + websiteCodeBuffer.toString('base64'),
+        url: 'data:image/jpeg;base64,' + qrCode.img,
         qrId: qrCode.qrId
       };
     };
 
     const getQrCodeResult = async (item) => {
-      log.info(`${item.downloader.deviceType},扫码中`)
-      const loginResult = await item.downloader._getLoginResult(item.qrId);
+      console.log(`${item.downloader.deviceType},扫码中`)
+
+      const loginResult = await item.downloader._getLoginResultAsync(item.qrId);
       if (!loginResult.isSuccess) {
-        return
+        return loginResult
       }
       // const cookies = loginResult.cookies
       // fs.writeFileSync(item.downloader.cookiePath, Buffer.from(JSON.stringify(cookies)))
-      log.info(item.downloader.cookiePath)
-      log.info(item.downloader.deviceType, "登录成功")
+      console.log(item.downloader.cookiePath)
+      console.log(item.downloader.deviceType, "登录成功")
+      return loginResult
     };
 
     const loadQrCode = async () => {
@@ -70,8 +65,11 @@ export default {
             .then(data => {
               item.url = data.url;
               item.qrId = data.qrId;
-              setInterval(() => {
-                getQrCodeResult(item)
+              const interval = setInterval(async () => {
+                const loginResult = await getQrCodeResult(item)
+                if (loginResult.isSuccess) {
+                  clearInterval(interval)
+                }
               }, 2000)
             });
 
@@ -80,8 +78,7 @@ export default {
 
 
     onMounted(async () => {
-      // await loadQrCode();
-      console.log(window.downloader)
+      await loadQrCode();
     });
 
     return {

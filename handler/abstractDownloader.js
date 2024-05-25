@@ -1,12 +1,12 @@
-const { iaxios } = require('../common/axioscf.js');
-const { config } = require('../common/config.js');
-const { log } = require('../common/log4jscf.js');
-const { sleep, buildHeaders, parseCookies, isElectron } = require('../common/utils.js');
+const {iaxios} = require('../common/axioscf.js');
+const {config} = require('../common/config.js');
+const {log} = require('../common/log4jscf.js');
+const {sleep, buildHeaders, parseCookies} = require('../common/utils.js');
 const path = require('path');
 const fs = require('fs');
-const { exec, spawn } = require('child_process');
+const {exec, spawn} = require('child_process');
 const kill = require('tree-kill');
-const { CustomError } = require('../common/error.js');
+const {CustomError} = require('../common/error.js');
 const os = require('os');
 
 
@@ -203,7 +203,9 @@ class AbstractDownloader {
     async _getLoginResult(qrId) {
         const url = config.loginBaseUrl + '/web/qrCode/check/' + qrId + '/' + Date.now();
 
-        const response = await iaxios.get(url)
+        const response = await iaxios.get(url, {
+            withCredentials: true
+        })
 
         if (response.status != 200) {
             throw new Error('网络请求失败');
@@ -217,16 +219,14 @@ class AbstractDownloader {
                 isSuccess
             }
         }
-        if (isElectron()) {
-            return {isSuccess: true}
-        } else {
-            const cookieHeaders = response.headers['set-cookie'];
-            const cookies = parseCookies(cookieHeaders)
-            return {
-                isSuccess: true,
-                cookies: cookies
-            };
-        }
+        const cookieHeaders = response.headers['set-cookie'];
+        console.log(cookieHeaders)
+        debugger
+        const cookies = parseCookies(cookieHeaders)
+        return {
+            isSuccess: true,
+            cookies: cookies
+        };
 
     }
 
