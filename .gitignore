@@ -8,6 +8,10 @@ task.db
 /db/file
 **cookie**
 **qrcode**
+logs/
+cookies.json
+db/file/
+qrcode.png
 
 ### STS ###
 .apt_generated
@@ -37,12 +41,24 @@ build/
 ### VS Code ###
 .vscode/
 
+# local env files
+.env.local
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories and files
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+#Electron-builder output
+/dist_electron
 
 node_modules/
-logs/
-cookies.json
-db/file/
-qrcode.png
-.DS_Store
-
-package-lock.json
