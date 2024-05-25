@@ -4,6 +4,7 @@ import { app, protocol, BrowserWindow } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 import { initialize } from '@electron/remote/main';
+import path from "path";
 
 initialize();
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -12,7 +13,7 @@ const isDevelopment = process.env.NODE_ENV !== 'production'
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ])
-
+console.log(path.join(__dirname,'../src/preload.mjs'))
 async function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
@@ -25,7 +26,8 @@ async function createWindow() {
       nodeIntegration: true,
       contextIsolation: false,
       enableRemoteModule: true,//开启remote功能
-      webSecurity: false
+      webSecurity: false,
+      preload: path.join(__dirname,'../src/preload.mjs')
     }
   })
 
