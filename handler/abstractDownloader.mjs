@@ -1,7 +1,7 @@
 import {iaxios} from '../common/axioscf.mjs'
 import {config} from '../common/config.mjs'
 import {log} from '../common/log4jscf.mjs'
-import {sleep, buildHeaders, parseCookies} from '../common/utils.mjs'
+import {sleep, buildHeaders, parseCookies, isElectron} from '../common/utils.mjs'
 import path from "path";
 import fs from "fs";
 import {exec, spawn} from "child_process";
@@ -213,12 +213,17 @@ class AbstractDownloader {
                 isSuccess
             }
         }
-        const cookieHeaders = response.headers['set-cookie'];
-        const cookies = parseCookies(cookieHeaders)
-        return {
-            isSuccess: true,
-            cookies: cookies
-        };
+        if (isElectron()) {
+            return {isSuccess: true}
+        } else {
+            const cookieHeaders = response.headers['set-cookie'];
+            const cookies = parseCookies(cookieHeaders)
+            return {
+                isSuccess: true,
+                cookies: cookies
+            };
+        }
+
     }
 
     async _getCurrentUser() {
