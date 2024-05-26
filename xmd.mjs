@@ -1,13 +1,13 @@
 #!/usr/bin/env node
-import {config} from './common/config.mjs'
+import {config} from '@/main/common/config.mjs'
 import pLimit from 'p-limit';
-import {log} from './common/log4jscf.mjs'
-import {trackdb} from './db/trackdb.mjs'
-import {albumdb} from './db/albumdb.mjs'
+import {log} from '@/main/common/log4jscf.mjs'
+import {trackdb} from '@/main/db/trackdb.mjs'
+import {albumdb} from '@/main/db/albumdb.mjs'
 import {program, InvalidArgumentError} from "commander"
-import {AtomicInteger} from './common/AtomicInteger.mjs'
-import {sleep} from './common/utils.mjs'
-import {DownloaderFactory} from './handler/downloader.mjs'
+import {AtomicInteger} from '@/main/common/AtomicInteger.mjs'
+import {sleep} from '@/main/common/utils.mjs'
+import {DownloaderFactory} from '@/main/downloader/downloader.mjs'
 import os from "os";
 import fs from "fs";
 import path from 'path'

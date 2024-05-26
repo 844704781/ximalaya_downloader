@@ -1,6 +1,5 @@
 import {createRouter, createWebHashHistory} from 'vue-router'
 
-const login = () => import('@/components/Login')
 
 export default createRouter({
         history: createWebHashHistory(),
@@ -8,7 +7,7 @@ export default createRouter({
             {
                 path: '/',
                 name: 'Login',
-                component: login
+                component: () => import('@/renderer/src/views/Login.vue')
             }
         ],
 

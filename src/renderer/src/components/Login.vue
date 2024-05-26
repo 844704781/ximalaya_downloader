@@ -27,10 +27,10 @@
 <script>
 import {reactive, onMounted} from 'vue';
 import logoPath from '../assets/logo.png';
-import {WebSiteDownloader} from "../../handler/webSiteDownloader.mjs";
-import {DarwinDownloader} from "../../handler/darwinDownloader.mjs";
+import {WebSiteDownloader} from "../../../main/downloader/webSiteDownloader.mjs";
+import {DarwinDownloader} from "../../../main/downloader/darwinDownloader.mjs";
 import fs from "fs";
-import {log} from "../../common/log4jscf.mjs";
+import {log} from "../../../main/common/log4jscf.mjs";
 
 export default {
   name: "Login",

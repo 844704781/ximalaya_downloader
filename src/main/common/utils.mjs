@@ -112,26 +112,7 @@ function addCookie(_cookies, key, value) {
     })
 }
 
-const isElectron = () => {
-    // Method 1: Check process.versions.electron
-    if (typeof process !== 'undefined' && process.versions && !!process.versions.electron) {
-        return true;
-    }
-
-    // Method 2: Check window.process.type
-    if (typeof window !== 'undefined' && typeof window.process === 'object' && window.process.type === 'renderer') {
-        return true;
-    }
-
-    // Method 3: Check navigator.userAgent
-    if (typeof navigator === 'object' && typeof navigator.userAgent === 'string' && navigator.userAgent.indexOf('Electron') >= 0) {
-        return true;
-    }
-
-    return false;
-};
-
 
 export {
-    sleep, httpCookie, buildHeaders, parseCookies, convertCookiesToString, addCookie, isElectron
+    sleep, httpCookie, buildHeaders, parseCookies, convertCookiesToString, addCookie
 }
