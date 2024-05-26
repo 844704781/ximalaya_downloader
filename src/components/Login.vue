@@ -70,7 +70,7 @@ export default {
                 if (loginResult.isSuccess) {
                   clearInterval(interval)
                 }
-              }, 2000)
+              }, 5000)
             });
 
       }));
@@ -79,6 +79,7 @@ export default {
 
     onMounted(async () => {
       await loadQrCode();
+      // console.log(window.downloader)
     });
 
     return {
