@@ -1,7 +1,7 @@
 import {iaxios} from '../common/axioscf.mjs'
 import {config} from '../common/config.mjs'
-// import {log} from '../common/log4jscf.mjs'
-import {sleep, buildHeaders, parseCookies} from '../common/utils.mjs'
+import {log} from '../common/log4jscf.mjs'
+import {sleep, buildHeaders, parseCookies, convertCookiesToString} from '../common/utils.mjs'
 import path from "path";
 import fs from "fs";
 import {exec, spawn} from "child_process";
@@ -84,7 +84,7 @@ class AbstractDownloader {
       if (process.platform == 'darwin') {
         exec(`osascript -e 'quit app "Preview"'`, (err) => {
           if (err) {
-            // log.error('Error closing the image viewer:', err);
+            log.error('Error closing the image viewer:', err);
             return reject(err)
           }
           return resolve()
@@ -93,7 +93,7 @@ class AbstractDownloader {
         // 使用 taskkill 命令终止进程
         exec(`taskkill /IM PhotosApp.exe /F`, (err) => {
           if (err) {
-            // log.error('Error closing the image viewer:', err);
+            log.error('Error closing the image viewer:', err);
             return reject(err)
           }
           return resolve()
@@ -101,7 +101,7 @@ class AbstractDownloader {
       } else {
         kill(openProcess.pid, 'SIGKILL', (err) => {
           if (err) {
-            // log.error('Error closing the image viewer:', err);
+            log.error('Error closing the image viewer:', err);
             return reject(err)
           }
           return resolve()
@@ -134,7 +134,7 @@ class AbstractDownloader {
       throw new Error('数据为空');
     }
     if (response.data.ret != 0) {
-      // log.warn("喜马拉雅内部异常", response.data)
+      log.warn("喜马拉雅内部异常", response.data)
       throw new Error("喜马拉雅内部异常")
     }
     return {
@@ -164,10 +164,10 @@ class AbstractDownloader {
 
       fs.writeFileSync(this.qrCodePath, qrCodeBuffer);
 
-      // log.info(this.deviceType, "请使用喜马拉雅APP扫描登录二维码")
+      log.info(this.deviceType, "请使用喜马拉雅APP扫描登录二维码")
       const openProcess = this._openQrCode();
       //等待扫码
-      // log.info(this.deviceType, "等待登录结果...")
+      log.info(this.deviceType, "等待登录结果...")
       while (true) {
         const loginResult = await this._getLoginResult(qrCode.qrId)
         if (loginResult.isSuccess) {
@@ -181,11 +181,11 @@ class AbstractDownloader {
       try {
         await this._killQrCode(openProcess);
       } catch (e) {
-        // log.debug(e)
-        // log.info(this.deviceType, "扫码已成功，可自行关闭图片程序")
+        log.debug(e)
+        log.info(this.deviceType, "扫码已成功，可自行关闭图片程序")
       }
     }
-    // log.info(this.deviceType, "登录成功")
+    log.info(this.deviceType, "登录成功")
     const user = await this._getCurrentUser()
     this._checkUser(user, false)
     return this
@@ -214,18 +214,18 @@ class AbstractDownloader {
     }
     const cookieHeaders = response.headers['set-cookie'];
     const cookies = parseCookies(cookieHeaders)
-
+    this.cookies = convertCookiesToString(cookies)
     fs.writeFileSync(this.cookiePath, Buffer.from(JSON.stringify(cookies)))
     return {
       isSuccess: true,
       cookies: cookies
     };
-
   }
 
   async _getCurrentUser() {
     const url = `${config.baseUrl}/revision/main/getCurrentUser`
     const cookie = await this._getCookies()
+    log.info('cookie', cookie)
     const headers = buildHeaders(config.baseUrl, cookie)
     const response = await iaxios.get(url, {headers: headers})
     if (response.status != 200) {
@@ -235,11 +235,11 @@ class AbstractDownloader {
       throw new Error('数据为空');
     }
     if (response.data.ret == 401) {
-      // log.error(response.data.msg)
+      log.error(response.data.msg)
       return null
     }
     if (response.data.ret != 200) {
-      // log.error("喜马拉雅内部异常", response.data)
+      log.error("喜马拉雅内部异常", response.data)
       throw new Error("喜马拉雅内部异常")
     }
     return response.data.data; // 将响应数据解析为 JSON
@@ -251,16 +251,16 @@ class AbstractDownloader {
    */
   _checkUser(user, single) {
     if (user.isLoginBan) {
-      // log.warn("该用户被禁止登录")
+      log.warn("该用户被禁止登录")
     }
     if (!single) {
-      // log.info("用户名称:", user.nickname)
-      // log.info("是否vip:", user.isVip ? "是" : "否")
-      // log.info("vip剩余天数:", user.vipExpireTime)
-      // log.info("是否被检测为机器人:", "否")
+      log.info("用户名称:", user.nickname)
+      log.info("是否vip:", user.isVip ? "是" : "否")
+      log.info("vip剩余天数:", user.vipExpireTime)
+      log.info("是否被检测为机器人:", "否")
     }
     if (user.isRobot) {
-      // log.warn("警告，被系统检测为机器人，请暂停下载稍后重试")
+      log.warn("警告，被系统检测为机器人，请暂停下载稍后重试")
     }
   }
 
@@ -294,7 +294,7 @@ class AbstractDownloader {
       throw new Error('数据为空');
     }
     if (response.data.ret != 200) {
-      // log.error("喜马拉雅内部异常", response.data)
+      log.error("喜马拉雅内部异常", response.data)
       throw new Error("喜马拉雅内部异常")
     }
     return response.data.data;
@@ -319,7 +319,7 @@ class AbstractDownloader {
       throw new Error('数据为空');
     }
     if (response.data.ret != 200) {
-      // log.error("喜马拉雅内部异常", response.data)
+      log.error("喜马拉雅内部异常", response.data)
       throw new Error("喜马拉雅内部异常")
     }
     return response.data.data;
@@ -364,7 +364,7 @@ class AbstractDownloader {
       throw new Error('数据为空')
     }
     if (response.data.ret != 200) {
-      // log.error("喜马拉雅内部异常", response.data)
+      log.error("喜马拉雅内部异常", response.data)
       throw new Error("喜马拉雅内部异常")
     }
     return response.data.data
@@ -389,11 +389,11 @@ class AbstractDownloader {
       throw new Error('数据为空');
     }
     if (response.data.ret == 999 || response.data.ret == 1001) {
-      // log.warn(`${this.deviceType}端喜马拉雅接口内部异常`, response.data)
+      log.warn(`${this.deviceType}端喜马拉雅接口内部异常`, response.data)
       throw new CustomError(999, `${this.deviceType}端速率限制`)
     }
     if (response.data.ret != 0) {
-      // log.warn(`${this.deviceType}端喜马拉雅接口内部异常`, response.data)
+      log.warn(`${this.deviceType}端喜马拉雅接口内部异常`, response.data)
       throw new Error("喜马拉雅内部异常")
     }
     return {

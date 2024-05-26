@@ -34,6 +34,17 @@ class DownloaderFactory {
     }
     throw new Error(`暂不支持: ${type} 这种登录方式`)
   }
+
+  async hasOnlineDownloader() {
+    for (let i = 0; i < this.downloaders.length; i++) {
+      let item = this.downloaders[i]
+      const cookies = await item.downloader._getCookies()
+      if (cookies != null) {
+        return true
+      }
+    }
+    return false
+  }
 }
 
 export {

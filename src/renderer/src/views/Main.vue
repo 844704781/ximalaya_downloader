@@ -1,12 +1,24 @@
 <template>
-  <div>
-    这是主要页面板
-  </div>
+  <el-row>
+    <el-row>
+      <log-panel></log-panel>
+    </el-row>
+    <el-row>
+      <control-panel></control-panel>
+    </el-row>
+  </el-row>
 </template>
 
 <script>
+import LogPanel from "../components/LogPanel.vue";
+import ControlPanel from "../components/ControlPanel.vue";
+
 export default {
-  name: "Main"
+  name: "Main",
+  components: {
+    'log-panel': LogPanel,
+    'control-panel': ControlPanel
+  }
 }
 </script>
 

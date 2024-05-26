@@ -13,28 +13,58 @@
       <el-row>
         <el-col :span="12" v-for="(item, index) in list" :key="index">
           <el-row>
-            <el-image v-loading="item.url === null" :src="item.url" :fit="fit"/>
+            <div :class="item.qrcodeClass">
+              <el-image v-loading="item.url === null" :src="item.url" :fit="fit"/>
+              <div :class="item.loginSuccessClass">
+              </div>
+            </div>
           </el-row>
           <el-row class="qr-tag">
             <el-text>{{ item.tag }}</el-text>
           </el-row>
         </el-col>
       </el-row>
+      <el-row class="entering">
+        <el-button type="danger" size="large" :disabled="notAllowEnter">{{ buttonText }}</el-button>
+      </el-row>
     </el-main>
   </el-container>
 </template>
 
 <script>
-import {reactive, onMounted} from 'vue';
+import {reactive, onMounted, ref} from 'vue';
 import logoPath from '../assets/logo.png';
+import log from 'electron-log/renderer';
+import {useRouter} from 'vue-router'
 
 export default {
   name: "Login",
   setup() {
+    const router = useRouter()
+
+
     const fit = 'contain';
+    let notAllowEnter = ref(true);
+    let buttonText = ref('扫码中...');
     const list = reactive([
-      {deviceType: 'www2', url: null, qrId: null, isLogin: false, tag: 'Web端登录'},
-      {deviceType: 'mac', url: null, qrId: null, isLogin: false, tag: 'PC端登录'}
+      {
+        deviceType: 'www2',
+        url: null,
+        qrId: null,
+        isLogin: false,
+        tag: 'Web端登录',
+        qrcodeClass: '',
+        loginSuccessClass: ''
+      },
+      {
+        deviceType: 'mac',
+        url: null,
+        qrId: null,
+        isLogin: false,
+        tag: 'PC端登录',
+        qrcodeClass: '',
+        loginSuccessClass: ''
+      }
     ]);
 
     const abstractGetQrCode = async (deviceType) => {
@@ -46,13 +76,17 @@ export default {
     };
 
     const getQrCodeResult = async (item) => {
-      console.log(`${item.deviceType},扫码中`)
+      log.info(`${item.deviceType},扫码中`)
       const loginResult = await window.api.getLoginResult(item.deviceType, item.qrId)
       if (!loginResult.isSuccess) {
-        return
+        return loginResult
       }
-      console.log('当前登录用户', loginResult.user)
-
+      item.qrcodeClass = 'qrcode'
+      item.loginSuccessClass = 'loader'
+      notAllowEnter.value = false
+      buttonText.value = '直接进入'
+      log.info('当前登录用户', loginResult.user)
+      return loginResult
     };
 
     const loadQrCode = async () => {
@@ -61,9 +95,33 @@ export default {
           .then(data => {
             item.url = data.url;
             item.qrId = data.qrId;
-            setInterval(() => {
-              getQrCodeResult(item)
+            /**
+             * 获取扫码结果定时器
+             * @type {number}
+             */
+            let getQrCodeInterval = setInterval(async () => {
+              const loginResult = await getQrCodeResult(item)
+              if (loginResult.isSuccess) {
+                clearInterval(getQrCodeInterval)
+              }
             }, 5000)
+            let loginAllCheckInterval = setInterval(() => {
+              let loginCount = 0
+              for (const i in list) {
+                const item = list[i]
+                if (item.loginSuccessClass.trim() != '') {
+                  loginCount++
+                }
+              }
+              if (loginCount == list.length) {
+                //所有都登录了
+                notAllowEnter.value = false
+                buttonText.value = '进入'
+                clearInterval(loginAllCheckInterval)
+                router.push('/main')
+                window.api.enterMain()
+              }
+            }, 2000)
           });
       }));
     };
@@ -77,6 +135,8 @@ export default {
       logoPath,
       fit,
       list,
+      notAllowEnter,
+      buttonText,
       abstractGetQrCode,
       loadQrCode,
       getQrCodeResult
@@ -125,16 +185,109 @@ export default {
         align-items: center;
       }
 
+      .qrcode {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
       .el-image {
+        //border:solid 1px red;
         height: 250px;
         width: 250px;
+        z-index: -1;
       }
+
+      // 圆圈
+      .loader {
+        position: absolute;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 4px solid rgba(165, 220, 134, 0.2);
+        border-left-color: #A5DC86;
+        animation: animation_collect 1s linear 1 both; //infinite永远执行
+      }
+
+      // 圆圈动画代码
+      @keyframes animation_collect {
+        0% {
+          transform: rotate(270deg);
+          border-left-color: #A5DC86;
+        }
+        25% {
+          border-left-color: #A5DC86;
+        }
+        50% {
+          border-left-color: #A5DC86;
+        }
+        75% {
+          border-left-color: #A5DC86;
+        }
+        100% {
+          border-left-color: rgba(165, 220, 134, 0.2);
+          transform: rotate(0deg);
+        }
+      }
+
+      //对号
+      .loader::before {
+        position: absolute;
+        content: '';
+        top: 50%;
+        left: 15px;
+        border: 4px solid #A5DC86;
+        border-left-width: 0;
+        border-bottom-width: 0;
+        transform: scaleX(-1) rotate(135deg);
+        transform-origin: left top;
+        // 设置动画延迟1s执行，先执行外层圆圈动画 结束后执行该动画
+        animation: animation_true 0.5s 1s linear 1 both;
+        // 外层执行动画执行时，里面不显示，但是不能使用display:none,所以用opacity代替
+        opacity: 0;
+      }
+
+      @keyframes animation_true {
+        0% {
+          opacity: 0;
+          width: 0px;
+          height: 0px;
+        }
+        33% {
+          opacity: 1;
+          width: 20px;
+          height: 0px;
+        }
+        100% {
+          opacity: 1;
+          width: 20px;
+          height: 40px;
+        }
+      }
+
 
       .qr-tag {
         display: flex;
         flex-direction: row;
         justify-content: center;
         align-items: center;
+      }
+
+
+    }
+
+    .entering {
+      //border: solid 1px black;
+      margin-top: 50px;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+
+      .el-button {
+        width: 200px;
       }
     }
   }

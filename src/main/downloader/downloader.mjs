@@ -1,6 +1,6 @@
 import {WebSiteDownloader} from './webSiteDownloader.mjs'
 import {DarwinDownloader} from './darwinDownloader.mjs'
-// import {log} from '../common/log4jscf.mjs'
+import {log} from '../common/log4jscf.mjs'
 import {sleep} from "../common/utils.mjs";
 import {AtomicInteger} from "../common/AtomicInteger.mjs";
 
@@ -127,7 +127,7 @@ class DownloaderFactory {
         }
 
         const delayTime = (this.delay+=2) * 60 * 1000
-       // log.warn(`所有下载方式都受限了，${delayTime / 60000}分钟后会自动重试哦`)
+        log.warn(`所有下载方式都受限了，${delayTime / 60000}分钟后会自动重试哦`)
         await sleep(delayTime)
     }
 

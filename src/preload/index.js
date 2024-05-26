@@ -4,7 +4,8 @@ import {electronAPI} from '@electron-toolkit/preload'
 // Custom APIs for renderer
 const api = {
   getQrCode: (deviceType) => ipcRenderer.invoke('getQrCode', deviceType),
-  getLoginResult: (deviceType, qrId) => ipcRenderer.invoke('getLoginResult', deviceType, qrId)
+  getLoginResult: (deviceType, qrId) => ipcRenderer.invoke('getLoginResult', deviceType, qrId),
+  enterMain: () => ipcRenderer.invoke('enterMain'),
 }
 
 

@@ -1,6 +1,7 @@
 import {AbstractDownloader} from './abstractDownloader.mjs'
 import {convertCookiesToString, addCookie} from '../common/utils.mjs'
 import {decrypt} from "./core/mac-decrypt.mjs"
+import {log} from "../common/log4jscf.mjs";
 
 /**
  * PC端登录类
@@ -21,6 +22,7 @@ class DarwinDownloader extends AbstractDownloader {
             return this.cookies
         }
         const cookies = await this.__readCookies()
+        log.info("cookies:", cookies)
         if (cookies == null) {
             return null
         }

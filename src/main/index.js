@@ -2,15 +2,15 @@ import {app, shell, BrowserWindow, ipcMain} from 'electron'
 import {join} from 'path'
 import {electronApp, optimizer, is} from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import log from 'electron-log/main';
+import {registerGetQrCodeHandler, registerGetLoginResultHandler, registerEnterMainHandler} from './ipc'
 
-import {DownloaderFactory} from "../main/downloader/electronDownloader.mjs";
-import fs from "fs";
-
+log.initialize();
 
 function createWindow() {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 900,
+  let mainWindow = new BrowserWindow({
+    width: 800,
     height: 670,
     show: false,
     autoHideMenuBar: true,
@@ -22,10 +22,13 @@ function createWindow() {
     }
   })
 
-
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
   })
+
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
@@ -34,12 +37,15 @@ function createWindow() {
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
+  log.info('url', process.env['ELECTRON_RENDERER_URL'])
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+  return mainWindow
 }
+
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -54,11 +60,22 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
-
+  let mainWindow = null
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
-  ipcRegister()
-  createWindow()
+
+  registerGetQrCodeHandler()
+  registerGetLoginResultHandler()
+  registerEnterMainHandler(hasOnlineDownloader => {
+    if (mainWindow == null) {
+      return
+    }
+    mainWindow.setResizable(true)
+    if (hasOnlineDownloader) {
+      mainWindow.setSize(1024, 714)
+    }
+  })
+  mainWindow = createWindow()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
@@ -80,26 +97,30 @@ app.on('window-all-closed', () => {
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
 
-
-function ipcRegister() {
-  const downloaderFactory = DownloaderFactory.create()
-
-  ipcMain.handle('getQrCode', async (e, deviceType) => {
-    const downloader = downloaderFactory.getDownloader(deviceType)
-    const result = await downloader._getQrCode()
-    return result
-  })
-
-  ipcMain.handle('getLoginResult', async (e, deviceType, qrId) => {
-    const downloader = downloaderFactory.getDownloader(deviceType)
-    const result = await downloader._getLoginResult(qrId)
-    let user = null
-    if (result.isSuccess) {
-      user = await downloader._getCurrentUser()
-    }
-    return {
-      isSuccess: result.isSuccess,
-      user: user
-    }
-  })
-}
+//
+// function registerLoginHandler() {
+//
+//   ipcMain.handle('getQrCode', async (e, deviceType) => {
+//     const downloader = downloaderFactory.getDownloader(deviceType)
+//     const result = await downloader._getQrCode()
+//     return result
+//   })
+//
+//   ipcMain.handle('getLoginResult', async (e, deviceType, qrId) => {
+//     const downloader = downloaderFactory.getDownloader(deviceType)
+//     const result = await downloader._getLoginResult(qrId)
+//     let user = null
+//     if (result.isSuccess) {
+//       user = await downloader._getCurrentUser()
+//       downloader._checkUser(user)
+//     }
+//     return {
+//       isSuccess: result.isSuccess,
+//       user: user
+//     }
+//   })
+//
+//   ipcMain.handle('enterMain', async (e) => {
+//     const hasOnlineDownloader = downloaderFactory.hasOnlineDownloader()
+//   })
+// }
