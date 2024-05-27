@@ -16,7 +16,6 @@ class WebSiteDownloader extends AbstractDownloader {
     return this.__getQrCode(this.clientName)
   }
 
-<<<<<<< HEAD
     /**
      * 获取可用cookie
      * @returns {Promise<*>}
@@ -38,7 +37,6 @@ class WebSiteDownloader extends AbstractDownloader {
         addCookie(cookies, 'Hm_lvt_4a7d8ec50cfd6af753c4f8aee3425070', '1715830002,1715931095,1716018268,1716036376');
         addCookie(cookies, 'Hm_lpvt_4a7d8ec50cfd6af753c4f8aee3425070', Math.floor(Date.now() / 1000));
         addCookie(cookies, 'web_login', Date.now());
-
         this.cookies = convertCookiesToString(cookies)
         return this.cookies
 }

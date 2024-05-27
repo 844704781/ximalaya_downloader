@@ -17,6 +17,7 @@ class WebSiteDownloader extends AbstractDownloader {
   }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     /**
      * 获取可用cookie
      * @returns {Promise<*>}
@@ -38,9 +39,6 @@ class WebSiteDownloader extends AbstractDownloader {
         addCookie(cookies, 'Hm_lvt_4a7d8ec50cfd6af753c4f8aee3425070', '1715830002,1715931095,1716018268,1716036376');
         addCookie(cookies, 'Hm_lpvt_4a7d8ec50cfd6af753c4f8aee3425070', Math.floor(Date.now() / 1000));
         addCookie(cookies, 'web_login', Date.now());
-
-        this.cookies = convertCookiesToString(cookies)
-        return this.cookies
 =======
   /**
    * 获取可用cookie
@@ -50,10 +48,8 @@ class WebSiteDownloader extends AbstractDownloader {
   async _getCookies() {
     if (this.cookies) {
       return this.cookies
->>>>>>> 9a4ab59 (finish login page)
     }
     const cookies = await this.__readCookies()
-    log.info("cookies:", cookies)
     if (cookies == null) {
       return null
     }
@@ -65,10 +61,11 @@ class WebSiteDownloader extends AbstractDownloader {
     addCookie(cookies, 'Hm_lvt_4a7d8ec50cfd6af753c4f8aee3425070', '1715830002,1715931095,1716018268,1716036376');
     addCookie(cookies, 'Hm_lpvt_4a7d8ec50cfd6af753c4f8aee3425070', Math.floor(Date.now() / 1000));
     addCookie(cookies, 'web_login', Date.now());
+>>>>>>> a666eca (add main page)
 
-    this.cookies = convertCookiesToString(cookies)
-    return this.cookies
-  }
+        this.cookies = convertCookiesToString(cookies)
+        return this.cookies
+}
 
   _decrypt(encodeText) {
     const url = decrypt.getSoundCryptLink({deviceType: this.deviceType, link: encodeText})
