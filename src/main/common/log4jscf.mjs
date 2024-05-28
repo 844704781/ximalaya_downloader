@@ -1,4 +1,5 @@
-import log from 'electron-log/node.js';
+import log from 'electron-log/main';
 
+log.initialize();
 
 export {log}

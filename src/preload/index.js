@@ -8,7 +8,10 @@ const api = {
   enterMain: () => ipcRenderer.invoke('enterMain'),
   getCurrentUser: () => ipcRenderer.invoke('getCurrentUser'),
   exit: () => ipcRenderer.invoke('exit'),
-  download: (output, albumId) => ipcRenderer.invoke('download', output, albumId)
+  download: (output, albumId) => ipcRenderer.invoke('download', output, albumId),
+  logReceive: (callback) => ipcRenderer.on('logReceive', (event, message) => {
+    callback(event, message)
+  }),
 }
 
 

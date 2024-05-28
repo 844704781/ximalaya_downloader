@@ -2,7 +2,8 @@ import {app, shell, BrowserWindow, ipcMain} from 'electron';
 import {join} from 'path';
 import {electronApp, optimizer, is} from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
-import log from 'electron-log/main';
+import {log} from "../main/common/log4jscf.mjs";
+
 import {
   registerGetQrCodeHandler,
   registerGetLoginResultHandler,
@@ -13,7 +14,21 @@ import {
   downloaderFactory
 } from './ipc';
 
-log.initialize();
+
+let mainWindow = null
+
+log.hooks.push((message, transport) => {
+  if (transport !== log.transports.file) {
+    return message;
+  }
+  if (message.data[0].includes('password')) {
+    return false;
+  }
+  if (mainWindow != null) {
+    mainWindow.webContents.send('logReceive', `[${message.date}] [${message.level}]  ${message.data}`)
+  }
+  return message;
+});
 
 async function getSize() {
   const isLogin = await downloaderFactory.hasOnlineDownloader()
@@ -34,9 +49,9 @@ async function getSize() {
 
 async function createWindow() {
   const size = await getSize()
-
+  // console.log(__dirname)
   // Create the browser window.
-  let mainWindow = new BrowserWindow({
+  let browSerWindow = new BrowserWindow({
     width: size.width,
     height: size.height,
     show: false,
@@ -49,28 +64,27 @@ async function createWindow() {
     }
   });
 
-  mainWindow.on('ready-to-show', () => {
-    mainWindow.show();
+  browSerWindow.on('ready-to-show', () => {
+    browSerWindow.show();
   });
 
-  mainWindow.on('closed', () => {
-    mainWindow = null;
+  browSerWindow.on('closed', () => {
+    browSerWindow = null;
   });
 
-  mainWindow.webContents.setWindowOpenHandler((details) => {
+  browSerWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url);
     return {action: 'deny'};
   });
-
   // HMR for renderer based on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
   log.info('url', process.env['ELECTRON_RENDERER_URL']);
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    await mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
+    await browSerWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
   } else {
-    await mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
+    await browSerWindow.loadFile(join(__dirname, '../renderer/index.html'));
   }
-  return mainWindow;
+  return browSerWindow;
 }
 
 // This method will be called when Electron has finished
@@ -87,9 +101,6 @@ app.whenReady().then(async () => {
     optimizer.watchWindowShortcuts(window);
   });
 
-  let mainWindow = null;
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'));
 
   function isLoginCallback(isLogin) {
     if (mainWindow == null) {
@@ -115,6 +126,10 @@ app.whenReady().then(async () => {
   mainWindow = await createWindow();
   const isLogin = await downloaderFactory.hasOnlineDownloader()
   isLoginCallback(isLogin)
+
+  // setInterval(()=>{
+  //   log.info('are you ok???')
+  // },3000)
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
