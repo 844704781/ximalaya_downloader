@@ -1,11 +1,12 @@
 import {ipcMain} from "electron";
 import {DownloaderFactory} from "../main/downloader/electronDownloader.mjs";
+import {Application} from "../main/downloader/application.mjs";
 
 const downloaderFactory = DownloaderFactory.create()
 
 function registerGetQrCodeHandler() {
   ipcMain.handle('getQrCode', async (e, deviceType) => {
-    const downloader = downloaderFactory.getDownloader(deviceType)
+    const downloader = downloaderFactory.getOfflineDownloader(deviceType)
     const result = await downloader._getQrCode()
     return result
   })
@@ -13,7 +14,7 @@ function registerGetQrCodeHandler() {
 
 function registerGetLoginResultHandler() {
   ipcMain.handle('getLoginResult', async (e, deviceType, qrId) => {
-    const downloader = downloaderFactory.getDownloader(deviceType)
+    const downloader = downloaderFactory.getOfflineDownloader(deviceType)
     const result = await downloader._getLoginResult(qrId)
     let user = null
     if (result.isSuccess) {
@@ -35,7 +36,45 @@ function registerEnterMainHandler(callback) {
   })
 }
 
+function registerGetCurrentUserHandler(callback) {
+  ipcMain.handle('getCurrentUser', async (e) => {
+    return await downloaderFactory.getDownloader(null, async downloader => {
+      if (downloader == null) {
+        callback(false)
+        return
+      }
+      return await downloader._getCurrentUser()
+    })
+  })
+}
+
+function registerExitHandler(callback) {
+  ipcMain.handle('exit', (e) => {
+    const downloaderList = downloaderFactory.downloaders
+    if (downloaderList.length != 0) {
+      for (const downloaderListKey in downloaderList) {
+        let item = downloaderList[downloaderListKey]
+        item.downloader.removeCookie()
+      }
+    }
+    callback(false)
+  })
+}
+
+
+function registerDownloadHandler() {
+  ipcMain.handle('download', async (e, output, albumId) => {
+    await Application.run(downloaderFactory, output, albumId)
+  })
+}
+
 export {
-  downloaderFactory, registerGetQrCodeHandler, registerGetLoginResultHandler, registerEnterMainHandler
+  downloaderFactory,
+  registerGetQrCodeHandler,
+  registerGetLoginResultHandler,
+  registerEnterMainHandler,
+  registerGetCurrentUserHandler,
+  registerExitHandler,
+  registerDownloadHandler
 }
 

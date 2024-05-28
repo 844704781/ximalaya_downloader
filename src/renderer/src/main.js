@@ -10,3 +10,11 @@ app.use(ElementPlus)
 app.use(router)
 
 app.mount('#app')
+
+window.electron.ipcRenderer.on('route-to', (event, route) => {
+  if (route === 'main') {
+    router.push('/main');
+  } else if (route === 'login') {
+    router.push('/login');
+  }
+});

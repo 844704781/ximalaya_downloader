@@ -6,6 +6,9 @@ const api = {
   getQrCode: (deviceType) => ipcRenderer.invoke('getQrCode', deviceType),
   getLoginResult: (deviceType, qrId) => ipcRenderer.invoke('getLoginResult', deviceType, qrId),
   enterMain: () => ipcRenderer.invoke('enterMain'),
+  getCurrentUser: () => ipcRenderer.invoke('getCurrentUser'),
+  exit: () => ipcRenderer.invoke('exit'),
+  download: (output, albumId) => ipcRenderer.invoke('download', output, albumId)
 }
 
 

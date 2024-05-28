@@ -2,7 +2,7 @@
   <div class="user-main">
     <div class="avatar">
       <el-avatar
-        :src='avatarUrl'
+        :src='logoPic'
         :size="100"
       />
     </div>
@@ -10,7 +10,12 @@
       <div class="info-main">
         <el-row>
           <el-col :span="20" :offset="4">
-            {{ username }}
+            {{ nickname }}
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="20" :offset="4">
+            {{ mobile }}
           </el-col>
         </el-row>
         <el-row>
@@ -25,7 +30,7 @@
     <div class="exit">
       <el-row>
         <el-col :span="20" :offset="4">
-          <el-button type="info" link>退出</el-button>
+          <el-button type="info" link @click="exit">退出</el-button>
         </el-col>
       </el-row>
     </div>
@@ -33,21 +38,36 @@
 </template>
 
 <script>
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
+import log from "electron-log/renderer";
 
 export default {
   name: "UserPanel",
   setup() {
-    const avatarUrl = ref('https://imagev2.xmcdn.com/storages/7411-audiofreehighqps/86/59/GMCoOR4KADyzAABaWALLHLrf.jpg!strip=1&quality=7&magick=webp&op_type=5&upload_type=cover&name=web_large&device_type=ios')
-    const username = ref('watermelon_46')
+    const logoPic = ref('https://imagev2.xmcdn.com/storages/7411-audiofreehighqps/86/59/GMCoOR4KADyzAABaWALLHLrf.jpg!strip=1&quality=7&magick=webp&op_type=5&upload_type=cover&name=web_large&device_type=ios')
+    const nickname = ref('watermelon_46')
     const isVip = ref('false')
     const vipLeftDay = ref(10)
+    const mobile = ref('176****8447')
 
+    const exit = () => {
+      window.api.exit()
+    }
+
+    onMounted(async () => {
+      const user = await window.api.getCurrentUser()
+      nickname.value = user.nickname
+      logoPic.value = user.logoPic
+      isVip.value = user.isVip
+      mobile.value = user.mobile
+    })
     return {
-      avatarUrl,
-      username,
+      logoPic,
+      mobile,
+      nickname,
       isVip,
-      vipLeftDay
+      vipLeftDay,
+      exit
     }
   }
 }

@@ -1,4 +1,4 @@
-import log from 'electron-log/node';
+import log from 'electron-log/node.js';
 
 
 export {log}

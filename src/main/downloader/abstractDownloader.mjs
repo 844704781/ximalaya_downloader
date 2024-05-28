@@ -225,7 +225,6 @@ class AbstractDownloader {
   async _getCurrentUser() {
     const url = `${config.baseUrl}/revision/main/getCurrentUser`
     const cookie = await this._getCookies()
-    log.info('cookie', cookie)
     const headers = buildHeaders(config.baseUrl, cookie)
     const response = await iaxios.get(url, {headers: headers})
     if (response.status != 200) {
@@ -487,6 +486,13 @@ class AbstractDownloader {
   }
 
 
+  removeCookie() {
+    try {
+      this.cookies = null
+      fs.rmSync(this.cookiePath)
+    } catch (e) {
+    }
+  }
 }
 
 

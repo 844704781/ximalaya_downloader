@@ -32,23 +32,5 @@ const router = createRouter({
 )
 
 
-router.beforeEach((to, from, next) => {
-  // 假设这里有个判断用户是否登录的逻辑
-
-  if (to.path === '/login') {
-    const hasOnline = window.api.enterMain()
-    // 如果用户已经登录，并且要前往登录页面，则重定向到主页面
-    if (hasOnline) {
-      next('/main');
-    } else {
-      next();
-    }
-  } else {
-    next();
-  }
-
-});
-
-
 export default router
 

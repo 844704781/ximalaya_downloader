@@ -25,7 +25,7 @@
         </el-col>
       </el-row>
       <el-row class="entering">
-        <el-button type="danger" size="large" :disabled="notAllowEnter">{{ buttonText }}</el-button>
+        <el-button type="danger" size="large" :disabled="notAllowEnter" @click="enterClick">{{ buttonText }}</el-button>
       </el-row>
     </el-main>
   </el-container>
@@ -75,6 +75,15 @@ export default {
       };
     };
 
+    const enterClick = () => {
+      if (notAllowEnter.value) {
+        log.info('至少要扫一个二维码')
+        return
+      }
+      router.push('/main')
+      window.api.enterMain()
+    }
+
     const getQrCodeResult = async (item) => {
       log.info(`${item.deviceType},扫码中`)
       const loginResult = await window.api.getLoginResult(item.deviceType, item.qrId)
@@ -118,8 +127,7 @@ export default {
                 notAllowEnter.value = false
                 buttonText.value = '进入'
                 clearInterval(loginAllCheckInterval)
-                router.push('/main')
-                window.api.enterMain()
+                enterClick()
               }
             }, 2000)
           });
@@ -139,7 +147,8 @@ export default {
       buttonText,
       abstractGetQrCode,
       loadQrCode,
-      getQrCodeResult
+      getQrCodeResult,
+      enterClick
     };
   }
 };
