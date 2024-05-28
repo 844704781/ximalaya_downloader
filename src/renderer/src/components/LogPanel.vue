@@ -1,7 +1,11 @@
 <template>
   <el-row class="log-main">
     <el-scrollbar ref="outputContainer" class="output">
-      <div>{{ content }}</div>
+      <div>
+        <p v-for="(item,index) in logs" :key="index">
+          {{ item }}
+        </p>
+      </div>
     </el-scrollbar>
   </el-row>
 </template>
@@ -16,9 +20,8 @@ export default {
     ElScrollbar,
   },
   setup() {
-    const content = ref('');
     const outputContainer = ref(null);
-    content.value = '';
+    const logs = ref([])
     const scrollToBottom = () => {
       const container = outputContainer.value.wrapRef;
       container.scrollTop = container.scrollHeight;
@@ -28,17 +31,20 @@ export default {
     onMounted(() => {
       scrollToBottom();
       window.api.logReceive((event, message) => {
-        console.log('收到啦', message)
+        logs.value.push(message)
+        if (logs.value.length >= 1000) {
+          logs.value.shift()
+        }
       })
     });
 
-    watch(content, () => {
+    watch(logs.value, () => {
       scrollToBottom();
     });
 
     return {
-      content,
       outputContainer,
+      logs
     };
   },
 };
@@ -68,8 +74,8 @@ export default {
     white-space: pre-wrap; /* Ensure text will wrap */
     word-wrap: break-word; /* Ensure long words will break */
     word-break: break-all; /* Ensure links and long words break */
-    font-size: 15px;
-    line-height: 20px;
+    font-size: 12px;
+    line-height: 15px;
   }
 }
 </style>
