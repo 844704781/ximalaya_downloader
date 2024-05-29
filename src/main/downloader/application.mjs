@@ -7,7 +7,6 @@ import {program, InvalidArgumentError} from "commander"
 import {AtomicInteger} from '../common/AtomicInteger.mjs'
 import {sleep} from '../common/utils.mjs'
 import {DownloaderFactory as CommandDownloaderFactory} from '../downloader/downloader.mjs'
-import {DownloaderFactory as ClientDownloaderFactory} from '../downloader/electronDownloader.mjs'
 import os from "os";
 import fs from "fs";
 import path from 'path'
@@ -20,9 +19,9 @@ let finishCount = new AtomicInteger(0)
 
 let emoji = '>'
 
-async function getPLimit() {
-  const pLimitModule = await import('p-limit');
-  return pLimitModule.default;
+async function getPQueue() {
+  const pQueueModule = await import('p-queue')
+  return pQueueModule.default
 }
 
 async function printProgress(trackName, target, deviceType) {
@@ -31,7 +30,6 @@ async function printProgress(trackName, target, deviceType) {
     log.info(`${downloaderName}下载成功${emoji.repeat(5)}进度:${await getProgress(finishCount, taskCount)}%(${await finishCount.get()}/${await taskCount.get()})---->${target}`)
   else {
     log.info(`${downloaderName}当前信息${emoji.repeat(5)}进度:${await getProgress(finishCount, taskCount)}%(${await finishCount.get()}/${await taskCount.get()})`)
-
   }
 }
 
@@ -78,7 +76,8 @@ async function download(factory, options, album, track) {
     mkdirpSync(targetDir)
   }
 
-  const downloadResp = await factory.getDownloader(options.type, async downloader => {
+  const downloadResp = await factory.getDownloader(options.type, true, async downloader => {
+
     return {
       data: await downloader.download(track.trackId),
       deviceType: downloader.deviceType
@@ -97,7 +96,10 @@ async function download(factory, options, album, track) {
 }
 
 
-async function run(factory = null, output = null, albumId = null) {
+async function run(factory = null,
+                   output = null,
+                   albumId = null,
+                   switchMeta = null) {
   log.info("欢迎使用 ximalaya_downloader！🎉")
   log.info("如果觉得棒棒哒，去 GitHub 给我们点个星星吧！🌟")
   log.info("GitHub 地址：https://github.com/844704781/ximalaya_downloader 💻")
@@ -150,13 +152,11 @@ async function run(factory = null, output = null, albumId = null) {
   }
 
   log.info(`并发数:${options.concurrency}`)
-  const pLimit = await getPLimit()
-  const limit = pLimit(options.concurrency)
-
+  const pQueue = await getPQueue()
+  const queue = new pQueue({concurrency: options.concurrency})
   log.info("正在获取专辑信息")
 
-  const albumResp = await factory.getDownloader(options.type, async (downloader) => {
-
+  const albumResp = await factory.getDownloader(options.type, false, async (downloader) => {
     return await downloader.getAlbum(albumId)
   })
 
@@ -179,7 +179,6 @@ async function run(factory = null, output = null, albumId = null) {
     })
     album = albumResp
   }
-
   const iTrackCount = await trackdb.count({'albumId': albumId})
   if (album.trackCount == iTrackCount) {
     needFlushTracks = false
@@ -190,7 +189,7 @@ async function run(factory = null, output = null, albumId = null) {
     let num = 0
     log.info("正在获取章节列表")
     for (let pageNum = 1; pageNum <= total; pageNum++) {
-      const book = await factory.getDownloader(options.type, async downloader => {
+      const book = await factory.getDownloader(options.type, false, async downloader => {
         return await downloader.getTracksList(albumId, pageNum, pageSize)
       })
       const trackTotalCount = book.trackTotalCount
@@ -229,15 +228,37 @@ async function run(factory = null, output = null, albumId = null) {
   }
   log.info("数据加载中...️")
   while (true) {
+
     const tracks = await trackdb.find(condition, {"num": 1}, !options.slow ? options.concurrency * 2 : 1)
     if (tracks.length == 0) {
       log.info("已经下载完成")
       break
     }
-    const promises = tracks.map(track =>
-      limit(async () =>
-        await download(factory, options, album, track)))
-    await Promise.all(promises)
+    for (const tracksKey in tracks) {
+      const track = tracks[tracksKey]
+      if (switchMeta) {
+        if (switchMeta.getStart()) {
+          queue.start()
+          switchMeta.setStart(false)
+        } else {
+          log.info("已暂停")
+          queue.pause()
+          switchMeta.setStart(true)
+        }
+      }
+
+      return queue.add(async () => {
+        try {
+          return await download(factory, options, album, track)
+        } catch (e) {
+          log.info("已暂停")
+          queue.clear()
+          switchMeta.setStart(true)
+          return
+        }
+      })
+
+    }
     if (options.slow) {
       await sleep(Math.floor(Math.random() * (5000 - 500 + 1)) + 500)
     }

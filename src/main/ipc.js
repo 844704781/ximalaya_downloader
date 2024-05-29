@@ -1,6 +1,7 @@
 import {ipcMain} from "electron";
 import {DownloaderFactory} from "../main/downloader/electronDownloader.mjs";
 import {Application} from "../main/downloader/application.mjs";
+import {switchMeta} from "../main/common/switchMeta.mjs"
 
 const downloaderFactory = DownloaderFactory.create()
 
@@ -38,7 +39,7 @@ function registerEnterMainHandler(callback) {
 
 function registerGetCurrentUserHandler(callback) {
   ipcMain.handle('getCurrentUser', async (e) => {
-    return await downloaderFactory.getDownloader(null, async downloader => {
+    return await downloaderFactory.getDownloader(null, false, async downloader => {
       if (downloader == null) {
         callback(false)
         return
@@ -64,7 +65,14 @@ function registerExitHandler(callback) {
 
 function registerDownloadHandler() {
   ipcMain.handle('download', async (e, output, albumId) => {
-    await Application.run(downloaderFactory, output, albumId)
+    switchMeta.setStart(true)
+    await Application.run(downloaderFactory, output, albumId, switchMeta)
+  })
+}
+
+function registerSetDownloadSwitchHandler() {
+  ipcMain.handle('downloadSwitch', (e, isStart) => {
+    switchMeta.setStart(isStart)
   })
 }
 
@@ -75,6 +83,7 @@ export {
   registerEnterMainHandler,
   registerGetCurrentUserHandler,
   registerExitHandler,
-  registerDownloadHandler
+  registerDownloadHandler,
+  registerSetDownloadSwitchHandler
 }
 

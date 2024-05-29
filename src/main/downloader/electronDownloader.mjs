@@ -1,6 +1,9 @@
 import {WebSiteDownloader} from './webSiteDownloader.mjs'
 import {DarwinDownloader} from './darwinDownloader.mjs'
 import {AtomicInteger} from "../common/AtomicInteger.mjs";
+import {CustomError} from "../common/error.mjs";
+import {code} from "../common/code.mjs";
+import {log} from "../common/log4jscf.mjs";
 
 
 class DownloaderFactory {
@@ -18,12 +21,10 @@ class DownloaderFactory {
     const factory = new DownloaderFactory()
     factory.downloaders.push({
       downloader: new WebSiteDownloader(),
-      isLimit: false,
       executeCounter: new AtomicInteger(0)
     })
     factory.downloaders.push({
       downloader: new DarwinDownloader(),
-      isLimit: false,
       executeCounter: new AtomicInteger(0)
     })
     return factory
@@ -43,9 +44,6 @@ class DownloaderFactory {
   async getPolicyItem(downloads) {
     for (let i = downloads.length - 1; i >= 0; i--) {
       let item = downloads[i]
-      if (item.isLimit) {
-        continue
-      }
       let max = Math.floor(100 / (downloads.length - i))
       let currentCount = await item.executeCounter.get();
       if (currentCount < max) {
@@ -56,17 +54,20 @@ class DownloaderFactory {
     for (const download of downloads) {
       await download.executeCounter.set(0);
     }
-    const _downloads = downloads.filter(download => download.isLimit == false)
+    const _downloads = downloads
     if (_downloads.length == 0) {
       return null
     }
     const item = downloads[downloads.length - 1]
-    item.isLimit = false
     return item
   }
 
 
-  async getDownloader(type, cb) {
+  async getDownloader(type, needLimit = true, cb) {
+
+    if (needLimit == false) {
+      return cb(this.downloaders[0].downloader)
+    }
 
     for (let i = 0; i < this.downloaders.length; i++) {
       const item = await this.getPolicyItem(this.downloaders)
@@ -74,17 +75,21 @@ class DownloaderFactory {
       if (item == null) {
         break
       }
-      if (item.isLimit) {
-        continue
-      }
-
       try {
+
         return await cb(item.downloader)
       } catch (e) {
-        item.isLimit = true
+        if (e instanceof CustomError) {
+          if (e.code = code.NO_ITEM) {
+            log.info(`${item.downloader.deviceType} 剩余音频无法下载，原因:${e.message}`)
+            throw e
+          }
+        }
+        log.info(`原因:${e.message}`)
         continue
       }
     }
+    log.info('无可用的下载器')
     return null
 
     // const delayTime = (this.delay+=2) * 60 * 1000

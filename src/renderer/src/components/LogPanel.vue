@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import {ref, onMounted, watch} from 'vue';
+import {ref, onMounted, nextTick, watch} from 'vue';
 import {ElScrollbar} from 'element-plus';
 
 export default {
@@ -23,8 +23,10 @@ export default {
     const outputContainer = ref(null);
     const logs = ref([])
     const scrollToBottom = () => {
-      const container = outputContainer.value.wrapRef;
-      container.scrollTop = container.scrollHeight;
+      nextTick(()=>{
+        const container = outputContainer.value.wrapRef;
+        container.scrollTop = container.scrollHeight;
+      })
     };
 
 

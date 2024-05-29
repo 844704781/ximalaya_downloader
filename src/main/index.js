@@ -3,6 +3,7 @@ import {join} from 'path';
 import {electronApp, optimizer, is} from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
 import {log} from "../main/common/log4jscf.mjs";
+import {switchMeta} from "../main/common/switchMeta.mjs"
 
 import {
   registerGetQrCodeHandler,
@@ -11,6 +12,7 @@ import {
   registerGetCurrentUserHandler,
   registerExitHandler,
   registerDownloadHandler,
+  registerSetDownloadSwitchHandler,
   downloaderFactory
 } from './ipc';
 
@@ -29,6 +31,10 @@ log.hooks.push((message, transport) => {
   }
   return message;
 });
+
+switchMeta.setCallback(isStart => {
+  mainWindow.webContents.send('getSwitch', isStart)
+})
 
 async function getSize() {
   const isLogin = await downloaderFactory.hasOnlineDownloader()
@@ -122,7 +128,7 @@ app.whenReady().then(async () => {
   registerGetCurrentUserHandler(isLoginCallback);
   registerExitHandler(isLoginCallback);
   registerDownloadHandler()
-
+  registerSetDownloadSwitchHandler()
   mainWindow = await createWindow();
   const isLogin = await downloaderFactory.hasOnlineDownloader()
   isLoginCallback(isLogin)

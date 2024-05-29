@@ -8,6 +8,7 @@ import {exec, spawn} from "child_process";
 import kill from "tree-kill";
 import {CustomError} from '../common/error.mjs'
 import os from 'os'
+import {code} from "../common/code.mjs";
 
 /**
  * 下载抽象类
@@ -377,10 +378,13 @@ class AbstractDownloader {
    */
   async _getBaseInfo(trackId) {
     const trackQualityLevel = 2
+
     const url = `${config.baseUrl}/mobile-playpage/track/v3/baseInfo/${Date.now()}?device=${this.deviceType}&trackId=${trackId}&trackQualityLevel=${trackQualityLevel}`
     const referer = `${config.baseUrl}/album/${trackId}`
     const headers = buildHeaders(referer, await this._getCookies())
+
     const response = await iaxios.get(url, {headers: headers})
+
     if (response.status != 200) {
       throw new Error('网络请求失败');
     }
@@ -394,6 +398,9 @@ class AbstractDownloader {
     if (response.data.ret != 0) {
       log.warn(`${this.deviceType}端喜马拉雅接口内部异常`, response.data)
       throw new Error("喜马拉雅内部异常")
+    }
+    if (response.data.trackInfo.playUrlList == null) {
+      throw new CustomError(code.NO_ITEM, `无法获取音源，请检查账号是否是会员账号`)
     }
     return {
       playUrlList: response.data.trackInfo.playUrlList,

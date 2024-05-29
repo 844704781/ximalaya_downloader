@@ -1,5 +1,6 @@
 import {contextBridge, ipcRenderer} from 'electron'
 import {electronAPI} from '@electron-toolkit/preload'
+import {switchMeta} from "../main/common/switchMeta.mjs"
 
 // Custom APIs for renderer
 const api = {
@@ -12,6 +13,9 @@ const api = {
   logReceive: (callback) => ipcRenderer.on('logReceive', (event, message) => {
     callback(event, message)
   }),
+  getSwitch: (callback) => ipcRenderer.on('getSwitch', (event, isStart) => {
+    callback(event, isStart)
+  })
 }
 
 

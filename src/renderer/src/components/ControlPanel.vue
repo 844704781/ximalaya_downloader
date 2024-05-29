@@ -30,7 +30,7 @@
         <el-input v-model="url" placeholder="请输入专辑链接，例如：https://www.ximalaya.com/album/38160002"/>
       </el-col>
       <el-col :span="3" :offset="1">
-        <el-button type="danger" @click="download">下载</el-button>
+        <el-button type="danger" @click="download">{{ downloadSwitch ? '下载' : '暂停' }}</el-button>
       </el-col>
     </el-row>
   </div>
@@ -46,7 +46,7 @@ export default {
     const fileInput = ref(null);
     const selectedDirectory = ref('');
     const canSelectDirectory = ref(true);
-
+    const downloadSwitch = ref(true)
 
     const triggerFileInput = () => {
       if (canSelectDirectory.value) {
@@ -77,6 +77,11 @@ export default {
     }
 
     const download = () => {
+      if (downloadSwitch.value == false) {
+        window.api.downloadSwitch(false)
+        downloadSwitch.value = true
+        return
+      }
       let output = '~/Desktop'
       if (selectedDirectory.value != '') {
         output = selectedDirectory.value
@@ -94,12 +99,20 @@ export default {
         return
       }
       window.api.download(output, albumId)
+      downloadSwitch.value = false
     }
+
+    onMounted(() => {
+      window.api.getSwitch((event, isStart) => {
+        downloadSwitch.value = isStart
+      })
+    })
 
     return {
       url,
       download,
       fileInput,
+      downloadSwitch,
       triggerFileInput,
       selectedDirectory,
       canSelectDirectory,
