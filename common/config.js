@@ -1,8 +1,22 @@
 import fs from "fs";
 import {projectRoot} from "../settings.js";
-import defaultConfig from "../config.json";
 
-let _config = defaultConfig
+let _config = {
+  "baseUrl": "https://www.ximalaya.com",
+  "loginBaseUrl": "https://passport.ximalaya.com",
+  "archives": "~/Downloads",
+  "xmd": "~/.xmd",
+  "cookie": {
+    "www2": {
+      "serverMode": false,
+      "value": ""
+    },
+    "mac": {
+      "serverMode": false,
+      "value": ""
+    }
+  }
+}
 if (fs.existsSync(`${projectRoot}/config.json`)) {
   const configBuf = fs.readFileSync(`${projectRoot}/config.json`)
   _config = JSON.parse(String(configBuf))
