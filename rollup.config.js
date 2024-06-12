@@ -5,7 +5,7 @@ import json from "@rollup/plugin-json";
 export default {
   input: 'xmd.js',
   output: {
-    file: 'dist/ximalaya.js',
+    file: 'dist/xmd.js',
     format: 'commonjs',
   },
   plugins: [
