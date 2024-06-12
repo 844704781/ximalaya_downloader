@@ -1,8 +1,7 @@
 import fs from "fs";
 import {projectRoot} from "../settings.js";
-import defaultConfig from "../config.json";
 
-let _config = defaultConfig
+let _config
 if (fs.existsSync(`${projectRoot}/config.json`)) {
   const configBuf = fs.readFileSync(`${projectRoot}/config.json`)
   _config = JSON.parse(String(configBuf))
