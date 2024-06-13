@@ -58,6 +58,11 @@ function cleanedStr(str) {
     return encodedStr;
 }
 
+async function removeContentInBrackets(str) {
+  // 使用正则表达式匹配并删除 () 和 【】 包含的内容，包括括号本身
+    return str.replace(/(\（.*?\）|【.*?】)/g, '');
+}
+
 async function download(factory, options, album, track) {
     if (track.path && fs.existsSync(track.path)) {
         return
@@ -78,7 +83,14 @@ async function download(factory, options, album, track) {
             deviceType: downloader.deviceType
         }
     })
-    const filePath = path.join(targetDir, track.num + "." + cleanedStr(track.title) + data.extension)
+    if (options.index) {
+        var filePath = path.join(targetDir, track.num + "." + cleanedStr(track.title) + data.extension)
+    } else {
+        var filePath = path.join(targetDir, cleanedStr(track.title) + data.extension)
+    }
+    if (options.clean) {
+        filePath = await removeContentInBrackets(filePath)
+    }
     fs.writeFileSync(filePath, data.buffer)
     await trackDB.update({'trackId': track.trackId}, {'path': filePath})
     await finishCount.increment()
@@ -95,6 +107,8 @@ async function main() {
         .option('-n, --concurrency <number>', '并发数,默认10', myParseInt)
         .option('-s, --slow', '慢速模式')
         .option('-t, --type', '登录类型,可选值pc、web,默认都登陆(需要扫码多次)')
+        .option('-i, --index', '添加编号')
+        .option('-c, --clean', '净化标题，将会去除标题中（）或【】所包含的内容')
         .option('-r, --replace', '清除缓存,任务将重新下载')
         .option('-o, --output <value>', '当前要保存的目录,默认为~/Downloads', config.archives);
 
