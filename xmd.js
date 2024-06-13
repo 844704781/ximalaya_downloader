@@ -97,6 +97,16 @@ async function download(factory, options, album, track) {
     await printProgress(track.title, filePath, deviceType)
 }
 
+function parseTrackRange(value) {
+  const rangePattern = /^([1-9]\d*)(?:-([1-9]\d*))?$/
+    const match = value.match(rangePattern)
+    if (!match) {
+        throw new InvalidArgumentError()
+    }
+    const start = parseInt(match[1], 10)
+    const end = match[2] ? parseInt(match[2], 10) : null
+    return { start, end }
+}
 
 async function main() {
     log.info("欢迎使用 ximalaya_downloader！🎉")
@@ -110,7 +120,8 @@ async function main() {
         .option('-i, --index', '添加编号')
         .option('-c, --clean', '净化标题，将会去除标题中（）或【】所包含的内容')
         .option('-r, --replace', '清除缓存,任务将重新下载')
-        .option('-o, --output <value>', '当前要保存的目录,默认为~/Downloads', config.archives);
+        .option('-o, --output <value>', '当前要保存的目录,默认为~/Downloads', config.archives)
+        .option('-R, --range <range>', '指定下载的章节范围', parseTrackRange);
 
     program.parse(process.argv)
     const options = program.opts();
@@ -216,20 +227,30 @@ async function main() {
         return
     }
     log.info("数据加载中...️")
-    while (true) {
-        const tracks = await trackDB.find(condition, {"num": 1}, !options.slow ? options.concurrency * 2 : 1)
-        if (tracks.length == 0) {
-            log.info("已经下载完成")
-            break
-        }
-        const promises = tracks.map(track =>
+    let tracksToDownload
+    if (options.range) {
+        const { start, end } = options.range
+        tracksToDownload = await trackDB.find(condition, { "num": 1 })
+        tracksToDownload = tracksToDownload.filter(track => track.num >= start && (end ? track.num <= end : true))
+    } else {
+        tracksToDownload = await trackDB.find(condition, { "num": 1 }, !options.slow ? options.concurrency * 2 : 1)
+    }
+
+    while (tracksToDownload.length > 0) {
+        const promises = tracksToDownload.map(track =>
             limit(async () =>
                 await download(factory, options, album, track)))
         await Promise.all(promises)
         if (options.slow) {
             await sleep(Math.floor(Math.random() * (5000 - 500 + 1)) + 500)
         }
+        if (options.range) {
+            break
+        }
+        tracksToDownload = await trackDB.find(condition, { "num": 1 }, !options.slow ? options.concurrency * 2 : 1)
     }
+    log.info("已经下载完成")
+    return
 }
 
 main()
