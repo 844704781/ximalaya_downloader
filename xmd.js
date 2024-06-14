@@ -58,7 +58,7 @@ function cleanedStr(str) {
     return encodedStr;
 }
 
-async function removeContentInBrackets(str) {
+function removeContentInBrackets(str) {
   // 使用正则表达式匹配并删除 () 和 【】 包含的内容，包括括号本身
     return str.replace(/(\（.*?\）|【.*?】)/g, '');
 }
@@ -84,12 +84,11 @@ async function download(factory, options, album, track) {
         }
     })
     if (options.index) {
-        var filePath = path.join(targetDir, track.num + "." + cleanedStr(track.title) + data.extension)
+        let cleanedTitle = options.clean ? removeContentInBrackets(cleanedStr(track.title)): cleanedStr(track.title)
+        var filePath = path.join(targetDir, track.num + "." + cleanedTitle + data.extension)
     } else {
-        var filePath = path.join(targetDir, cleanedStr(track.title) + data.extension)
-    }
-    if (options.clean) {
-        filePath = await removeContentInBrackets(filePath)
+        let cleanedTitle = options.clean ? removeContentInBrackets(cleanedStr(track.title)) : cleanedStr(track.title)
+        var filePath = path.join(targetDir, cleanedTitle + data.extension)
     }
     fs.writeFileSync(filePath, data.buffer)
     await trackDB.update({'trackId': track.trackId}, {'path': filePath})
