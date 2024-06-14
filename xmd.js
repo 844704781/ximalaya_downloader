@@ -120,7 +120,7 @@ async function main() {
         .option('-c, --clean', '净化标题，将会去除标题中（）或【】所包含的内容')
         .option('-r, --replace', '清除缓存,任务将重新下载')
         .option('-o, --output <value>', '当前要保存的目录,默认为~/Downloads', config.archives)
-        .option('-R, --range <range>', '指定下载的章节范围', parseTrackRange);
+        .option('-R, --range <value>', '指定下载的章节范围，格式：100-200或100（表示从100章直到结尾）', parseTrackRange);
 
     program.parse(process.argv)
     const options = program.opts();
