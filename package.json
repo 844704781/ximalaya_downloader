@@ -6,23 +6,14 @@
   "author": "watermelon <844704781@qq.com>",
   "license": "MIT",
   "scripts": {
-<<<<<<< HEAD
-    "start": "electron .",
     "pkg": "pkg dist/xmd.js --targets node20-win-x64,node20-linux-x64,node20-macos-x64 --public --out-dir dist",
     "build:rollup": "rollup -c",
-    "release": "npm i && npm run build:rollup && npm run pkg"
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
-    "electron:build": "vue-cli-service electron:build",
-    "electron:serve": "vue-cli-service electron:serve",
-=======
+    "release": "npm i && npm run build:rollup && npm run pkg",
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
     "start": "electron-vite preview",
     "dev": "electron-vite dev",
     "build": "electron-vite build",
->>>>>>> 3ede008 (update)
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
@@ -46,30 +37,15 @@
     "nedb": "^1.8.0",
     "p-queue": "^8.0.1",
     "rimraf": "^5.0.7",
-    "tree-kill": "^1.2.2"
+    "tree-kill": "^1.2.2",
+    "vue-router": "^4.3.2"
   },
-  "type": "module",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.8",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@yao-pkg/pkg": "^5.11.5",
-    "rollup": "^4.18.0"
-    "tree-kill": "^1.2.2",
-    "vue-router": "^4.3.2"
-<<<<<<< HEAD
-    "@babel/core": "^7.12.16",
-    "@babel/eslint-parser": "^7.12.16",
-    "@vue/cli-plugin-babel": "~5.0.0",
-    "@vue/cli-plugin-eslint": "~5.0.0",
-    "@vue/cli-service": "~5.0.0",
-    "electron": "^13.0.0",
-    "electron-devtools-installer": "^3.1.0",
-    "eslint": "^7.32.0",
-    "eslint-plugin-vue": "^8.0.3",
-=======
-  },
-  "devDependencies": {
+    "rollup": "^4.18.0",
     "@electron-toolkit/eslint-config": "^1.0.1",
     "@rushstack/eslint-patch": "^1.6.1",
     "@vitejs/plugin-vue": "^5.0.3",
@@ -80,7 +56,6 @@
     "eslint": "^8.56.0",
     "eslint-plugin-vue": "^9.20.1",
     "prettier": "^3.2.4",
->>>>>>> 3ede008 (update)
     "sass": "^1.77.2",
     "vite": "^5.0.12",
     "vue": "^3.4.15"
