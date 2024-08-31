@@ -1,6 +1,7 @@
 import {AbstractDownloader} from '../handler/abstractDownloader.js'
 import {convertCookiesToString, addCookie} from '../common/utils.js'
 import {decrypt} from "../handler/core/www2-decrypt.js"
+import {getWfp} from "./core/ats.2.5.7.js";
 
 /**
  * 网站登录类
@@ -28,8 +29,9 @@ class WebSiteDownloader extends AbstractDownloader {
         if (cookies == null) {
             return null
         }
+        let wfp = await getWfp.send()
         addCookie(cookies, '_xmLog', 'h5&85125320-3c87-43c0-8228-f43734d4bddf&2.4.15-alpha.2');
-        addCookie(cookies, 'wfp', 'ACM3MzgxZDgyMTlhZmNiZWFj9Y5Ezm5xFoF4bXdlYl93d3c');
+        addCookie(cookies, 'wfp', wfp.data.openid);
         addCookie(cookies, 'xm-page-viewid', 'ximalaya-web');
         addCookie(cookies, 'impl', 'www.ximalaya.com.login');
         addCookie(cookies, 'x_xmly_traffic', 'utm_source%253A%2526utm_medium%253A%2526utm_campaign%253A%2526utm_content%253A%2526utm_term%253A%2526utm_from%253A');
