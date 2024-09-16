@@ -143,15 +143,22 @@ async function main() {
             "albumId": albumId,
             "albumTitle": albumResp.albumTitle,
             "isFinished": albumResp.isFinished,//0:不间断更新 1:连载中 2:完结
-            "trackCount": albumResp.trackCount
+            "trackCount": albumResp.trackCount,
+            "cover": albumResp.cover
         }
         await albumDB.insert(album)
     } else {
         await albumDB.update({'albumId': albumId}, {
             "isFinished": album.isFinished,
-            "trackCount": album.trackCount
+            "trackCount": album.trackCount,
+            "cover": albumResp.cover
         })
         album = albumResp
+    }
+
+    if(album.cover){
+        console.log(album.cover)
+        // TODO 下载图片
     }
 
     const iTrackCount = await trackDB.count({'albumId': albumId})
