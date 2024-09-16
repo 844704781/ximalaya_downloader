@@ -339,6 +339,7 @@ class AbstractDownloader {
             albumId: albumId,
             albumTitle: simple['albumPageMainInfo']['albumTitle'],
             isFinished: simple['albumPageMainInfo']['isFinished'],
+            cover: "https:" + simple['albumPageMainInfo']['cover'],
             trackCount: book.trackTotalCount
         }
     }
