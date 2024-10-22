@@ -167,7 +167,10 @@ async function main() {
             const book = await factory.getDownloader(options.type, async downloader => {
                 return await downloader.getTracksList(albumId, pageNum, pageSize)
             })
-            const trackTotalCount = book.trackTotalCount
+            let trackTotalCount = book.trackTotalCount
+            if (trackTotalCount === 0) {
+                trackTotalCount = albumResp.trackCount
+            }
             total = Math.floor(trackTotalCount / pageSize) + 1
             for (let index in book.tracks) {
                 num++
