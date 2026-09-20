@@ -85,6 +85,16 @@ async function download(factory, options, album, track) {
     await printProgress(track.title, filePath, deviceType)
 }
 
+function parseRange(range) {
+    let arr = range.split('-')
+    if (arr.some(v => isNaN(parseInt(v)))) {
+        throw new Error("range 格式错误，请检查")
+    }
+    return {
+        start: parseInt(arr[0]),
+        end: parseInt(arr[1])
+    }
+}
 
 async function main() {
     log.info("欢迎使用 ximalaya_downloader！🎉")
@@ -96,7 +106,8 @@ async function main() {
         .option('-s, --slow', '慢速模式')
         .option('-t, --type', '登录类型,可选值pc、web,默认都登陆(需要扫码多次)')
         .option('-r, --replace', '清除缓存,任务将重新下载')
-        .option('-o, --output <value>', '当前要保存的目录,默认为~/Downloads', config.archives);
+        .option('-o, --output <value>', '当前要保存的目录,默认为~/Downloads', config.archives)
+        .option('-R, --range <value>', '下载指定范围,格式为:1-100');
 
     program.parse(process.argv)
     const options = program.opts();
@@ -190,14 +201,28 @@ async function main() {
         }
         log.info("获取章节列表成功")
     }
-    const condition = {"albumId": albumId, path: null}
 
-    await taskCount.set(await trackDB.count({"albumId": albumId}))
+    // 范围
+    let extQuery = {}
+    if (options.range) {
+        const {start, end} = parseRange(options.range)
+        extQuery["num"] = {}
+        if (start) {
+            extQuery["num"]["$gte"] = start
+        }
+        if (end) {
+            extQuery["num"]["$lte"] = end
+        }
+    }
+    const condition = {"albumId": albumId, path: null, ...extQuery}
+    
+    await taskCount.set(await trackDB.count({"albumId": albumId, ...extQuery}))
     await finishCount.set(await trackDB.count({
         "albumId": albumId,
         "path": {
             $ne: null
-        }
+        },
+        ...extQuery,
     }))
     await printProgress()
     if (await taskCount.get() == await finishCount.get()) {
