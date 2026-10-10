@@ -8,7 +8,7 @@ import {getWfp} from "./core/ats.2.5.7.js";
  */
 class WebSiteDownloader extends AbstractDownloader {
     constructor() {
-        super('www2');
+        super('www2', 'www2');
         this.clientName = "喜马拉雅网页端"
     }
 

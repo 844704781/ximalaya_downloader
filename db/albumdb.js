@@ -7,8 +7,11 @@ import path from 'path'
  * 记录专辑
  */
 
+// config.json 缺 xmd 字段时兜底，否则这里的 replace 会抛 TypeError
+const xmdHome = String(config.xmd || '~/.xmd').replace('~', os.homedir())
+
 const db = new Datastore({
-    filename : path.join(config.xmd.replace('~', os.homedir()),'db','file','album.db'),
+    filename : path.join(xmdHome, 'db', 'file', 'album.db'),
     autoload: true
 });
 
@@ -78,6 +81,26 @@ albumDB.update = (condition, setEntity) => {
     // 更新数据
     return new Promise((resolve, reject) => {
         db.update(condition, {$set: setEntity}, (err, numReplaced) => {
+            if (err) {
+                return reject(err)
+            } else {
+                return resolve(numReplaced)
+            }
+        });
+    })
+}
+
+/**
+ * 批量更新
+ *
+ * nedb 的 update 默认 multi: false，一次只改一条文档。
+ * @param condition 查询条件
+ * @param setEntity $set 的内容
+ * @returns {Promise<number>} 受影响行数
+ */
+albumDB.updateMulti = (condition, setEntity) => {
+    return new Promise((resolve, reject) => {
+        db.update(condition, {$set: setEntity}, {multi: true}, (err, numReplaced) => {
             if (err) {
                 return reject(err)
             } else {

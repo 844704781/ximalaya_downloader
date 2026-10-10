@@ -1,0 +1,59 @@
+# electron-builder 打包配置
+#
+# 说明：
+#  - out/ 是 electron-vite build 的产物
+#  - config.json / images / resource 是运行时要读的资源，必须放进 extraResources，
+#    否则打包后项目根的 config.json 不会被带上
+#  - dependencies 会被 electron-builder 自动打进 app，devDependencies 不会
+
+appId: com.ximalaya.downloader
+productName: 喜马拉雅下载器
+copyright: Copyright © 2024 watermelon
+
+directories:
+  output: release
+  buildResources: build
+
+files:
+  - out/**
+  - package.json
+  - "!**/*.map"
+
+extraResources:
+  - from: config.json
+    to: config.json
+  - from: images
+    to: images
+  - from: resource
+    to: resource
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  # artifactName 刻意用 ASCII：中文文件名在部分 CI / 下载环节会出问题
+  artifactName: ximalaya-downloader-${version}-win-${arch}.${ext}
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  shortcutName: 喜马拉雅下载器
+
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  category: public.app-category.utilities
+  artifactName: ximalaya-downloader-${version}-mac-${arch}.${ext}
+
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+  category: AudioVideo
+  artifactName: ximalaya-downloader-${version}-linux-${arch}.${ext}

@@ -8,7 +8,7 @@ import {decrypt} from "../handler/core/mac-decrypt.js"
 class DarwinDownloader extends AbstractDownloader {
 
     constructor() {
-        super('mac');
+        super('mac', 'win');
         this.clientName = "喜马拉雅电脑版"
     }
 

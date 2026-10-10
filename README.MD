@@ -94,11 +94,30 @@ config.json
 }
 ```
 
+#### 下载付费/VIP声音需要的设备指纹
+
+免费声音开箱即用。付费和VIP声音的播放地址接口带风控，请求头要带 `xm-sign`，它由官方风控SDK用浏览器设备指纹换取，所以需要你提供一份本机指纹。
+
+**一次性配置**：用日常在用的 Chrome/Edge 打开 https://www.ximalaya.com ，按 F12 打开控制台，粘贴执行：
+
+```javascript
+copy(JSON.stringify((()=>{const s=window.du_web_sdk,c=s._deviceInfoCollector||s._checkextensions._deviceInfoCollector,o={};for(const k of Object.keys(c)){const v=c[k];if(typeof v==='function')continue;try{JSON.stringify(v);o[k]=v}catch(e){}}return o})()))
+```
+
+结果已复制到剪贴板，粘贴保存为 `~/.xmd/device-info.json` 即可（Windows 下是 `C:\Users\你的用户名\.xmd\device-info.json`）。
+
+> 必须用日常正常使用的浏览器采集。指纹浏览器、自动化控制的浏览器（Selenium/Playwright/AdsPower 等）采出来的指纹会被风控直接拒绝，表现为付费声音一直报"被风控"。
+
 ### 使用案例
 
 ```shell
 node xmd.js -a 51523585 -s
 ```
+
+### 关于下载失败
+
+- **提示专辑已下架或不支持客户端渠道**：部分专辑（尤其是恐怖、悬疑类）在客户端渠道被限制，换个专辑即可，不是程序问题。
+- **提示被风控**：单个渠道有频率限制，程序会自动切到另一个渠道；两个渠道都受限时，下个整点会重置。慢速模式（`-s`）能明显降低触发概率。
 
 ### 待实现
 - [ ] 使用pkg打包发布Release（tips:哪位大神可以帮帮忙，我pkg打包失败了o(╥﹏╥)o）

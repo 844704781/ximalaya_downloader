@@ -44,5 +44,30 @@ cookies.json
 db/file/
 qrcode.png
 .DS_Store
+dist/
+build/
+*.exe
+*.zip
 
 package-lock.json
+
+# electron-vite 构建产物
+out/
+# electron-builder 打包产物
+release/
+
+# 本地运行数据（cookie / nedb 数据库 / 日志）
+.xmd-data/
+logs/
+# 默认下载目录
+downloads/
+
+# ⚠️ 上面 NetBeans 段有一行 `build/`，会把整个 build 目录忽略掉。
+# 但 build/ 同时是 electron-builder 的 buildResources 目录（应用图标放在这里），
+# 不把图标放回来的话，打包会退回 Electron 默认图标。
+# git 的规则是「要重新包含目录下的文件，必须先把目录本身放回来」。
+!build/
+build/*
+!build/icon.ico
+!build/icon.png
+!build/icon.icns

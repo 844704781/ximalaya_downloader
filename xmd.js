@@ -113,7 +113,7 @@ async function main() {
     log.info(`当前保存目录:${options.output}`)
 
     if (options.concurrency == null) {
-        options.concurrency = 10
+        options.concurrency = 5
     }
     if (!options.slow) {
         emoji = '＞'

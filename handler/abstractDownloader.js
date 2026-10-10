@@ -1,25 +1,59 @@
 import {iaxios} from '../common/axioscf.js'
 import {config} from '../common/config.js'
 import {log} from '../common/log4jscf.js'
-import {sleep, buildHeaders, parseCookies} from '../common/utils.js'
+import {sleep, buildHeaders, parseCookies, addCookie, convertCookiesToString} from '../common/utils.js'
+import {randomUUID} from 'crypto'
 import path from "path";
 import fs from "fs";
 import {exec, spawn} from "child_process";
 import kill from "tree-kill";
+import {pipeline} from 'stream/promises'
 import {CustomError} from '../common/error.js'
+import {getXmSign} from './core/xm-sign.js'
 import os from 'os'
+
+// www 域的 revision 接口已被 dws 风控接管，需要浏览器指纹算出的 xm-sign 才能访问，
+// 命令行侧无法复刻，章节列表与播放地址改走无此校验的客户端接口
+const MOBILE_BASE_URL = 'https://mobile.ximalaya.com'
+
+/**
+ * 从 content-type 推断音频文件扩展名
+ *
+ * _getAudio 和 streamAudio 共用。原实现内嵌在 _getAudio 里，
+ * 这里提到模块级；_getAudio 内部那份保留不动，以免影响 CLI 的既有行为。
+ * @param contentType
+ * @returns {string} 形如 '.m4a'，无法识别时返回空串
+ */
+function getFileExtension(contentType) {
+    if (contentType == null) {
+        return ''
+    }
+    // 去掉 '; charset=...' 之类的参数
+    const pureType = String(contentType).split(';')[0].trim()
+    const parts = pureType.split('/')
+    if (parts.length === 2) {
+        return '.' + parts[1].replace('x-', '')
+    }
+    return ''
+}
 
 /**
  * 下载抽象类
  */
 class AbstractDownloader {
-    constructor(deviceType) {
+    constructor(deviceType, playDeviceType) {
         if (this.constructor == AbstractDownloader) {
             throw new Error("抽象类不能被实例化")
         }
         this.deviceType = deviceType
-        this.cookiePath = path.join(config.xmd.replace('~', os.homedir()), `${deviceType}-cookies.json`)
-        this.qrCodePath = path.join(config.xmd.replace('~', os.homedir()), `${deviceType}-qrcode.png`);
+        // 付费声音接口按这个值决定密文用哪套算法加密，与 cookie 用的 deviceType 不是一回事
+        this.playDeviceType = playDeviceType
+        this.pcDeviceId = randomUUID()
+        // config.json 里缺 xmd 字段时要有兜底，否则构造函数直接抛 TypeError，
+        // 登录面板会整个不可用
+        const xmdHome = String(config.xmd || '~/.xmd').replace('~', os.homedir())
+        this.cookiePath = path.join(xmdHome, `${deviceType}-cookies.json`)
+        this.qrCodePath = path.join(xmdHome, `${deviceType}-qrcode.png`);
         this.albumId = null
         this.cookies = null
 
@@ -352,7 +386,7 @@ class AbstractDownloader {
      * @returns {Promise<*>}
      */
     async getTracksList(albumId, pageNum, pageSize) {
-        const url = `${config.baseUrl}/revision/album/v1/getTracksList?albumId=${albumId}&pageNum=${pageNum}&pageSize=${pageSize}`
+        const url = `${MOBILE_BASE_URL}/mobile/v1/album/track?albumId=${albumId}&device=android&isAsc=true&pageId=${pageNum}&pageSize=${pageSize}&source=0`
         const referer = `${config.baseUrl}/album/${albumId}`
         const headers = buildHeaders(referer, await this._getCookies())
         const response = await iaxios.get(url, {headers: headers})
@@ -362,11 +396,19 @@ class AbstractDownloader {
         if (response.data == null) {
             throw new Error('数据为空')
         }
-        if (response.data.ret != 200) {
+        if (response.data.ret == 924) {
+            log.error(`专辑${albumId}在客户端渠道不可用，换个专辑试试`, response.data)
+            throw new CustomError(924, "该专辑已下架或不支持客户端渠道")
+        }
+        if (response.data.ret != 0) {
             log.error("喜马拉雅内部异常", response.data)
             throw new Error("喜马拉雅内部异常")
         }
-        return response.data.data
+        const data = response.data.data
+        return {
+            trackTotalCount: data.totalCount,
+            tracks: data.list.map(track => ({trackId: track.trackId, title: track.title}))
+        }
     }
 
     /**
@@ -376,8 +418,7 @@ class AbstractDownloader {
      * @private
      */
     async _getBaseInfo(trackId) {
-        const trackQualityLevel = 2
-        const url = `${config.baseUrl}/mobile-playpage/track/v3/baseInfo/${Date.now()}?device=${this.deviceType}&trackId=${trackId}&trackQualityLevel=${trackQualityLevel}`
+        const url = `${MOBILE_BASE_URL}/mobile/v1/track/baseInfo/${Date.now()}?device=pc&trackId=${trackId}`
         const referer = `${config.baseUrl}/album/${trackId}`
         const headers = buildHeaders(referer, await this._getCookies())
         const response = await iaxios.get(url, {headers: headers})
@@ -395,10 +436,64 @@ class AbstractDownloader {
             log.error(`${this.deviceType}端喜马拉雅接口内部异常`, response.data)
             throw new Error("喜马拉雅内部异常")
         }
-        return {
-            playUrlList: response.data.trackInfo.playUrlList,
-            trackTitle: response.data.albumInfo.title
+        const info = response.data
+        const playUrl = info.playPathHq || info.downloadUrl || info.playUrl64 || info.playUrl32
+        if (playUrl == null || playUrl == '') {
+            // 付费声音这里只有时长和体积，地址要另走带签名的加密接口
+            return {
+                url: await this._getPaidPlayUrl(trackId),
+                trackTitle: info.title
+            }
         }
+        return {
+            url: playUrl,
+            trackTitle: info.title
+        }
+    }
+
+    /**
+     * 付费声音专用 cookie：登录态 + 客户端设备身份
+     *
+     * 这几个设备 cookie 不能并到 _getCookies，章节列表接口按 device=android 请求，
+     * 带上 win32 的设备标识会被判成参数矛盾直接拒掉
+     * @returns {Promise<string>}
+     */
+    async _getPaidCookies() {
+        const cookies = await this.__readCookies()
+        addCookie(cookies, 'install_id', this.pcDeviceId)
+        addCookie(cookies, '1&_device', `win32&${this.pcDeviceId}&4.0.14`)
+        addCookie(cookies, 'channel', '99&100001')
+        return convertCookiesToString(cookies)
+    }
+
+    /**
+     * 获取付费声音的播放地址
+     * @param trackId
+     * @returns {Promise<string>}
+     */
+    async _getPaidPlayUrl(trackId) {
+        const {xmSign, userAgent} = await getXmSign()
+        const url = `${config.baseUrl}/mobile-playpage/track/v3/baseInfo/${Date.now()}?device=${this.playDeviceType}&trackId=${trackId}&trackQualityLevel=1`
+        const headers = buildHeaders(`${config.baseUrl}/`, await this._getPaidCookies())
+        headers['User-Agent'] = userAgent
+        headers['Origin'] = config.baseUrl
+        headers['xm-sign'] = xmSign
+        const response = await iaxios.get(url, {headers: headers})
+        if (response.status != 200) {
+            throw new Error('网络请求失败')
+        }
+        if (response.data == null) {
+            throw new Error('数据为空')
+        }
+        if (response.data.ret != 0) {
+            log.error(`${this.deviceType}端付费声音接口异常`, response.data)
+            throw new CustomError(999, `${this.deviceType}端被风控或没有该声音的收听权限`)
+        }
+        const playUrlList = response.data.trackInfo.playUrlList
+        if (playUrlList == null || playUrlList.length == 0) {
+            throw new CustomError(403, `没有该声音的收听权限，需要VIP或已购买(trackId:${trackId})`)
+        }
+        return this._decrypt(this._playUrl(playUrlList).encodeText)
     }
 
     /**
@@ -471,6 +566,177 @@ class AbstractDownloader {
 
 
     /**
+     * 获取章节的播放地址（公开封装，供 GUI 侧调用）
+     * @param trackId
+     * @returns {Promise<{url: string, trackTitle: string}>}
+     */
+    async getPlayUrl(trackId) {
+        return await this._getBaseInfo(trackId)
+    }
+
+    /**
+     * 流式下载音频到临时文件，支持随时中止
+     *
+     * 与 _getAudio 的区别：_getAudio 用 responseType:'arraybuffer' 把整个文件一次性读进内存，
+     * 没有中间态，无法暂停。本方法把响应作为流写入磁盘，可通过 signal 中止。
+     *
+     * 注意：这是「简化版」下载，不使用 HTTP Range 断点续传。
+     * 被中止时由调用方删除 partPath，恢复时该章节从头重新下载。
+     *
+     * @param url 播放地址
+     * @param signal AbortController.signal，用于暂停/取消
+     * @param partPath 临时文件路径（写完后由调用方 rename 成最终文件名）
+     * @param onStart ({extension, total}) => void 收到响应头时回调，此时才知道类型和总大小
+     * @param onProgress ({received, total}) => void
+     * @returns {Promise<{received: number, total: number, extension: string}>}
+     */
+    async streamAudio(url, {signal, partPath, onStart, onProgress}) {
+        if (url == null || url === '') {
+            throw new Error('播放地址为空')
+        }
+        if (partPath == null || partPath === '') {
+            throw new Error('临时文件路径为空')
+        }
+        const response = await iaxios({
+            method: 'GET',
+            url: url,
+            responseType: 'stream',
+            signal: signal
+        })
+        if (response.status !== 200) {
+            throw new Error(`网络请求失败: HTTP ${response.status}`)
+        }
+        if (response.data == null) {
+            throw new Error('数据为空')
+        }
+
+        const total = Number(response.headers['content-length'] || 0)
+        const extension = getFileExtension(response.headers['content-type'])
+        if (typeof onStart === 'function') {
+            onStart({extension: extension, total: total})
+        }
+
+        let received = 0
+        response.data.on('data', chunk => {
+            received += chunk.length
+            if (typeof onProgress === 'function') {
+                onProgress({received: received, total: total})
+            }
+        })
+
+        // 注意：pipeline 在 destination 出错时并不保证销毁 source。
+        // 磁盘写满（ENOSPC）这类情况下如果不主动销毁，响应流会继续收数据，
+        // socket 与 'data' 监听器滞留，之后 socket 报错就变成 unhandled 'error' event，
+        // 而 process.on('uncaughtException') 兜不住它，主进程会直接崩溃。
+        try {
+            await pipeline(response.data, fs.createWriteStream(partPath))
+        } catch (e) {
+            response.data.destroy()
+            throw e
+        }
+        return {received: received, total: total, extension: extension}
+    }
+
+    /**
+     * 把内部 user 对象裁剪成可以安全传给渲染进程的形状
+     * @param user
+     * @returns {object|null}
+     */
+    _publicUser(user) {
+        if (user == null) {
+            return null
+        }
+        return {
+            nickname: user.nickname,
+            isVip: !!user.isVip,
+            vipExpireTime: user.vipExpireTime,
+            isRobot: !!user.isRobot,
+            isLoginBan: !!user.isLoginBan
+        }
+    }
+
+    /**
+     * 获取登录二维码（不阻塞、不打开系统看图程序）
+     *
+     * 供 GUI 使用：前端拿到 base64 图片自己渲染，然后轮询 checkLogin。
+     * 原来的 login() 会写 png 并调用系统看图软件、然后 while(true) 死循环等待，
+     * 那套逻辑只适合命令行，保留给 CLI 使用。
+     * @returns {Promise<{qrId: string, img: string}>}
+     */
+    async requestQrCode() {
+        const qrCode = await this._getQrCode()
+        if (qrCode == null || qrCode.img == null) {
+            throw new Error('获取登录二维码失败')
+        }
+        return {
+            qrId: qrCode.qrId,
+            img: `data:image/png;base64,${qrCode.img}`
+        }
+    }
+
+    /**
+     * 查询一次扫码结果（供前端每 2 秒轮询）
+     * @param qrId requestQrCode 返回的 qrId
+     * @returns {Promise<{ok: boolean, user: object|null}>}
+     */
+    async checkLogin(qrId) {
+        const loginResult = await this._getLoginResult(qrId)
+        if (!loginResult.isSuccess) {
+            return {ok: false, user: null}
+        }
+        fs.mkdirSync(path.dirname(this.cookiePath), {recursive: true})
+        fs.writeFileSync(this.cookiePath, Buffer.from(JSON.stringify(loginResult.cookies)))
+        // 清掉 cookie 缓存，让后续请求重新读取刚写入的文件
+        this.cookies = null
+        log.info(this.deviceType, "登录成功")
+
+        let user = null
+        try {
+            user = await this._getCurrentUser()
+        } catch (e) {
+            // 扫码已经成功，拿不到用户信息不该让整个登录失败
+            log.warn(`${this.deviceType} 登录成功但获取用户信息失败:`, e)
+        }
+        return {ok: true, user: this._publicUser(user)}
+    }
+
+    /**
+     * 查询登录状态（不会抛异常，供 GUI 启动时调用）
+     *
+     * 不能直接用 isLogin()：它没有 try/catch，网络抖动会把整个启动流程炸掉。
+     * @returns {Promise<{logged: boolean, user?: object, error?: string}>}
+     */
+    async getLoginState() {
+        try {
+            const cookies = await this._getCookies()
+            if (cookies == null) {
+                return {logged: false}
+            }
+            const user = await this._getCurrentUser()
+            if (user == null) {
+                return {logged: false}
+            }
+            return {logged: true, user: this._publicUser(user)}
+        } catch (e) {
+            log.warn(`${this.deviceType} 登录态检查失败:`, e)
+            return {logged: false, error: String(e && e.message ? e.message : e)}
+        }
+    }
+
+    /**
+     * 退出登录：删除本地 cookie 文件
+     */
+    async logout() {
+        this.cookies = null
+        try {
+            fs.unlinkSync(this.cookiePath)
+        } catch (e) {
+            // cookie 文件本来就不存在，忽略
+        }
+        return {ok: true}
+    }
+
+    /**
      * 下载音频
      * @param trackId
      * @returns {Promise<buffer, fileExtension>}
@@ -479,9 +745,7 @@ class AbstractDownloader {
         let user = await this._getCurrentUser()
         await this._checkUser(user, true)
         const baseInfo = await this._getBaseInfo(trackId)
-        const e = this._playUrl(baseInfo.playUrlList)
-        const url = this._decrypt(e.encodeText)
-        const data = await this._getAudio(url)
+        const data = await this._getAudio(baseInfo.url)
         return data
     }
 
